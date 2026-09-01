@@ -1678,15 +1678,16 @@ const NARRATORS = [
     desc:'Caldă și blândă. Perfectă pentru citit seara.',
     descEn:'Warm & gentle. Perfect for bedtime reading.',
     color:'#ff6b8a',
-    rateDefault:0.80, pitch:1.10,
+    rateDefault:0.80, pitch:1.15,
     lang:'ro',
     prefs:[
-      v => /Ioana/i.test(v.name),                  // macOS Romanian
-      v => /Microsoft.*Andreea/i.test(v.name),
-      v => /ro-RO/i.test(v.lang),
-      v => /Microsoft.*(Natural|Online).*Romanian/i.test(v.name),
-      v => /romanian/i.test(v.name),
-      v => /Andrei/i.test(v.name) && /Romanian/i.test(v.name),
+      v => v.name === 'Ioana',                     // macOS Romanian female (exact name match)
+      v => v.name === 'Microsoft Andreea' || v.name === 'Microsoft Andreea - Romanian (Romania)',
+      v => /ro-RO/i.test(v.lang) && /female/i.test(v.name),
+      v => /romanian/i.test(v.name) && /female/i.test(v.name),
+      // Cross-language fallback: any warm female English voice
+      v => /^(Samantha|Karen|Victoria|Moira|Kate|Fiona|Tessa)/i.test(v.name),
+      v => /en-(GB|US)/i.test(v.lang) && /female/i.test(v.name) && /google|microsoft|natural/i.test(v.name),
     ]
   },
   {
@@ -1697,14 +1698,16 @@ const NARRATORS = [
     desc:'Răbdător și liniștit. Voce caldă de povestitor.',
     descEn:'Patient and calm. A warm storyteller voice.',
     color:'#39d3b6',
-    rateDefault:0.78, pitch:0.92,
+    rateDefault:0.78, pitch:0.78,
     lang:'ro',
     prefs:[
-      v => /Andrei/i.test(v.name),                  // macOS Romanian male
-      v => /Microsoft.*(Andrei|Romanian Male)/i.test(v.name),
+      v => v.name === 'Andrei',                     // macOS Romanian male (exact name match)
+      v => v.name === 'Microsoft Andrei' || v.name === 'Microsoft Andrei - Romanian (Romania)',
       v => /ro-RO/i.test(v.lang) && /male/i.test(v.name),
       v => /romanian/i.test(v.name) && /male/i.test(v.name),
-      v => /ro-RO/i.test(v.lang),
+      // Cross-language fallback: any deep male English voice
+      v => /^(Daniel|Alex|Fred|Tom|Arthur)/i.test(v.name),
+      v => /en-(GB|US)/i.test(v.lang) && /male/i.test(v.name) && /google|microsoft|samantha|natural/i.test(v.name),
     ]
   },
 ];
@@ -3428,11 +3431,19 @@ async function pickNarratorVoice(narratorId){
   const voices = await getVoices();
   for(const test of narrator.prefs){
     const found = voices.find(test);
-    if(found) return {voice:found, narrator};
+    if(found){
+      if(window.__rlDebug) console.log(`[voice] ${narrator.id} → ${found.name} (${found.lang})`);
+      return {voice:found, narrator};
+    }
   }
-  // Fallback: any English voice, then any voice
-  const anyEnglish = voices.find(v => /^en/i.test(v.lang));
-  return {voice: anyEnglish || voices[0] || null, narrator};
+  // Last resort: any voice matching language, with a console warning
+  const sameLang = voices.find(v => narrator.lang === 'ro' ? /^ro/i.test(v.lang) : /^en/i.test(v.lang));
+  if(sameLang){
+    console.warn(`[voice] ${narrator.id}: no preferred voice found, falling back to ${sameLang.name} (${sameLang.lang})`);
+    return {voice:sameLang, narrator};
+  }
+  console.warn(`[voice] ${narrator.id}: no voice available at all!`);
+  return {voice: voices[0] || null, narrator};
 }
 
 async function startTTS(){
