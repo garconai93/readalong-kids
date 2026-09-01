@@ -850,7 +850,7 @@ const NARRATORS = [
     emoji:'👵',
     desc:'Warm & slow. Best for first-time readers.',
     color:'#ff8a3d',
-    rateDefault:0.92, pitch:1.10,
+    rateDefault:0.78, pitch:1.08,
     prefs:[
       v => /Karen/i.test(v.name),                  // macOS
       v => /Microsoft.*(Aria Online|Natural)/i.test(v.name),
@@ -866,7 +866,7 @@ const NARRATORS = [
     emoji:'🧔',
     desc:'Friendly & adventurous. Great for story-time.',
     color:'#ffb86b',
-    rateDefault:1.00, pitch:0.95,
+    rateDefault:0.82, pitch:0.95,
     prefs:[
       v => /Daniel/i.test(v.name),                  // macOS
       v => /Microsoft.*(Guy|Davis)/i.test(v.name),
@@ -881,7 +881,7 @@ const NARRATORS = [
     emoji:'🦊',
     desc:'Bright & energetic. Loves silly stories.',
     color:'#ff6b8a',
-    rateDefault:1.05, pitch:1.20,
+    rateDefault:0.85, pitch:1.15,
     prefs:[
       v => /Samantha/i.test(v.name),
       v => /Microsoft.*(Jenny|Aria Online)/i.test(v.name),
@@ -897,7 +897,7 @@ const NARRATORS = [
     emoji:'🎩',
     desc:'Calm storyteller. Builds chapters with care.',
     color:'#39d3b6',
-    rateDefault:0.98, pitch:0.92,
+    rateDefault:0.80, pitch:0.92,
     prefs:[
       v => /Daniel/i.test(v.name),
       v => /Microsoft.*(Guy|Roger)/i.test(v.name),
@@ -913,7 +913,7 @@ const NARRATORS = [
     emoji:'🌙',
     desc:'Expressive & poetic. For dreamy tales.',
     color:'#7d6bff',
-    rateDefault:0.95, pitch:1.05,
+    rateDefault:0.78, pitch:1.05,
     prefs:[
       v => /Aria/i.test(v.name) && !/Online/i.test(v.name),  // macOS Aria (high quality)
       v => /Microsoft.*Aria/i.test(v.name),
@@ -937,8 +937,14 @@ const STORIES = [
     cover:'linear-gradient(135deg,#ffd166,#ff8a3d)',
     desc:'A warm day, a sleepy cat. Easy words, big ideas.',
     narrator:'helen',
-    words:52, wpmTarget:60,
-    text:`The sun is high in the sky. A little cat sits by the door. She is warm. She is sleepy. "Meow," she says. "I will nap here in the sun." A bird sings. A bee hums. The cat closes her eyes. The sun smiles down. What a good day for a nap.`
+    words:138, wpmTarget:60,
+    text:`The sun is high in the sky. A little cat sits by the door. She is warm. She is sleepy. "Meow," she says. "I will nap here in the sun."
+
+A bird sings on the fence. A bee hums near the flowers. The cat opens one eye. Then she closes it again. The sun is so warm and so bright. It feels like a soft, golden blanket.
+
+A small boy comes out to play. He sees the cat. He sits down next to her, very quiet. He does not want to wake her up. Together, they watch a cloud move across the blue sky.
+
+"Meow," says the cat. She rolls over and shows her soft white belly. The boy laughs. The cat purrs and purrs. What a good day. What a good nap. What a good friend.`
   },
   {
     id:'fox',
@@ -946,8 +952,16 @@ const STORIES = [
     cover:'linear-gradient(135deg,#ff8a3d,#ff6b8a)',
     desc:'A small fox, a big adventure. The story that started it all.',
     narrator:'ben',
-    words:46, wpmTarget:70,
-    text:`A little fox lives in the woods. He is small, but he is brave. Today he will go far. He walks by the brook. He jumps over rocks. He sees a deer. "Hello, friend!" he says. The deer nods back. The fox runs home before dark.`
+    words:142, wpmTarget:70,
+    text:`A little fox lives in the woods. He is small, but he is brave. Today he will go far.
+
+He walks by the brook. The water is cold and quick. He jumps over rocks, one, two, three. He does not fall in. He is brave.
+
+He sees a deer at the edge of the trees. "Hello, friend!" he says. The deer lifts her head and nods back. She is tall and quiet. The little fox feels very small. But he does not run away. He says hello again.
+
+The sun goes down. The sky turns orange, then pink. The fox turns back toward home. He runs through the soft leaves. He is tired, but he is happy. He went farther today than ever before.
+
+His mother meets him at the door. "You were so brave," she says. The little fox smiles. Tomorrow, he will go even farther.`
   },
   {
     id:'seed',
@@ -955,8 +969,18 @@ const STORIES = [
     cover:'linear-gradient(135deg,#5cd6a4,#39d3b6)',
     desc:'From a seed to a sunflower — patience and wonder.',
     narrator:'mira',
-    words:54, wpmTarget:90,
-    text:`Mara found a tiny seed in the garden. She planted it in soft, dark soil. She gave it water every day. Soon a small green sprout came up. The sprout grew taller every week. By summer it was a tall sunflower with bright yellow petals. Mara smiled. One tiny seed had become something beautiful.`
+    words:206, wpmTarget:90,
+    text:`Mara found a tiny seed in the garden. It was no bigger than her smallest fingernail. She cupped it in her hand and ran inside to show her grandmother.
+
+"What is this?" Mara asked. "A sunflower seed," said Grandmother. "Plant it in soft, dark soil. Give it water every day. And then you wait."
+
+Mara planted the seed in a brown paper pot. She gave it water from a little blue can. She set it on the windowsill where the morning sun came in. And then she waited.
+
+Nothing happened for two whole days. Mara checked the pot every morning. Still nothing. On the third day, a small green sprout pushed up through the soil. Mara clapped her hands. She ran to tell Grandmother.
+
+The sprout grew taller every week. Soon it had strong green leaves. Mara tied it to a stick so it would stand up straight. By summer, the little plant was taller than Mara herself. At the very top, a bright yellow flower opened to the sky.
+
+Inside the flower, hundreds of new seeds were waiting. Mara smiled. She picked the biggest one and put it in her pocket. "Next year," she said, "I will plant two."`
   },
   {
     id:'robot',
@@ -964,8 +988,20 @@ const STORIES = [
     cover:'linear-gradient(135deg,#39d3b6,#5b8cff)',
     desc:'A friendly robot learns the joy of small daily rituals.',
     narrator:'felix',
-    words:102, wpmTarget:110,
-    text:`Pip was a curious little robot who lived in a small blue house at the edge of town. Every afternoon at four o'clock, Pip watched the neighbors drink tea together. They laughed and talked while steam rose from their cups. Pip wanted to join them. But robots do not drink tea. So Pip learned to boil water, to set out cups, and to listen very carefully. Now every afternoon, Pip's house is the noisiest on the street. There is laughter, there is chatter, and there is always one cup of tea, still and warm, waiting for a robot who never drinks it.`
+    words:312, wpmTarget:110,
+    text:`Pip was a curious little robot who lived in a small blue house at the edge of town. Every afternoon at four o'clock, Pip watched the neighbors gather on their porches. They sat together in the warm light. They held small cups in their hands. They laughed, and talked, and watched the sun go down.
+
+Pip did not understand. The cups held only brown water with a strange smell. The neighbors did not seem to drink it very fast. They held it close, like a small warm friend.
+
+One day, Pip decided to try. Pip walked to the little shop at the corner. The shopkeeper smiled. "First time?" she asked. "Yes," said Pip. "Then you will need two things," she said. "A kettle, and time."
+
+Pip bought a small blue kettle. Back at home, Pip filled it with water. Pip set it on the stove and waited. Pip watched the water. The water did nothing for a long time. Then, very slowly, tiny bubbles began to rise. Soon the water was dancing, and the kettle made a low, singing sound.
+
+Pip poured the water into two small cups. Pip carried them carefully to the porch. A neighbor waved from across the street. "Come sit," she called. Pip sat down. The cup was warm in Pip's metal hands. Steam rose up and tickled Pip's antenna.
+
+They did not talk about important things. They talked about the dog that barked too much, and the cat that slept in the garden, and the boy who was learning to ride a bike. The sun went down. The streetlights came on. The cups grew cold.
+
+But Pip did not mind. Pip had discovered something the neighbors already knew. The cup was never really the point. The point was sitting together, on a porch, while the day grew soft.`
   },
   {
     id:'stars',
@@ -973,8 +1009,30 @@ const STORIES = [
     cover:'linear-gradient(135deg,#7d6bff,#ff6b8a)',
     desc:'A girl writes to the night sky — and the sky writes back.',
     narrator:'iris',
-    words:125, wpmTarget:130,
-    text:`Every night before bed, Iris climbs onto the roof of her grandparents' house and writes a letter to the stars. She tells them about her day, about the dog she saw, about the strange taste of rain. She folds each letter very small, sets it on the brightest star she can find, and whispers, "Please write soon." She never expects a reply. But one morning she wakes to find a paper airplane on her windowsill. It is folded from a piece of sky-blue paper, and it smells faintly of cold air. Inside, in handwriting she does not recognize, are three words: "We are listening." From that evening on, she writes two letters each night. One for the stars, and one for whoever is listening back.`
+    words:575, wpmTarget:130,
+    text:`Every night before bed, Iris climbs onto the roof of her grandparents' house and writes a letter to the stars. She brings a flashlight, a small notebook, and a thermos of warm milk. She sits near the chimney where the roof is flat, and she watches the sky until her eyes learn to see the smaller ones. Only then does she begin to write.
+
+She tells them about her day. She tells them about the dog she saw in the park, the one with one brown ear and one white ear, who looked at her as if he had been waiting. She tells them about the strange taste of rain, which she finally decided was the taste of something far away. She tells them about the boy at school who shares her lunch with her, even though he has not much lunch of his own.
+
+She folds each letter very small, sets it on the brightest star she can find, and whispers, "Please write soon." Then she climbs back down the ladder, slips into bed, and falls asleep mid-thought.
+
+She never expects a reply.
+
+But one morning, two months after she started, she wakes to find a paper airplane on her windowsill. It is folded from a piece of sky-blue paper, so pale it is almost white. It smells faintly of cold air, and of something sweet she cannot name. Inside, in handwriting she does not recognize, are three words: "We are listening."
+
+Iris stands very still. She holds the paper airplane in both hands, as if it might fly away. She reads the three words again, and again. Her heart is loud in her chest. Someone, somewhere, has been reading her letters. Someone has answered.
+
+That night, she climbs onto the roof as usual. But this time, before she writes her letter, she looks up at the stars for a long time. She tries to see who, up there, might be listening. She does not see anyone. The stars only blink back, the way stars do, with no face at all.
+
+She writes her letter anyway. She tells the stars about the paper airplane. She tells them she is not afraid, only very, very awake. She tells them she would like to know who is listening, but she does not need to know. Listening is enough.
+
+From that evening on, she writes two letters each night. One for the stars, as before. And one, in her secret blue notebook, for whoever is listening back. She does not send the second letter. She only writes it, and reads it to herself, and folds it into a paper crane that she keeps on her windowsill.
+
+The paper cranes begin to multiply. Soon there are too many to count. They line the windowsill like a small, soft, folded audience. Each one is addressed to the same person, even though she has never learned a name.
+
+And every so often, when the night is very clear and very quiet, a new paper airplane appears on the glass. The handwriting is always the same. The paper is always the same pale sky-blue. And the message is always short, and always kind.
+
+She keeps them all in a wooden box under her bed. She does not show them to anyone. Some conversations are not meant to be shared. They are only meant to be had, night after night, between a girl on a roof and someone, somewhere, in the dark.`
   }
 ];
 
