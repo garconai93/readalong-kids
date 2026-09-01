@@ -320,7 +320,43 @@ button{font:inherit}
   border:1px solid var(--line);border-radius:var(--radius);padding:24px;
   transition:transform .25s var(--ease),border-color .25s;
 }
-.feat:hover{transform:translateY(-2px);border-color:rgba(255,138,61,.25)}
+/* Continue reading card (home) */
+.continue-card{
+  display:grid;grid-template-columns:1fr;gap:24px;
+  background:linear-gradient(135deg,rgba(255,138,61,.10),rgba(57,211,182,.08));
+  border:1px solid rgba(255,138,61,.25);border-radius:var(--radius-lg);
+  padding:28px;align-items:center;
+  max-width:880px;margin-left:auto;margin-right:auto;
+  position:relative;overflow:hidden;
+}
+@media(min-width:720px){.continue-card{grid-template-columns:1.4fr .8fr;padding:36px}}
+.continue-card::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(135deg,rgba(255,138,61,.4),rgba(255,107,138,.2) 40%,transparent 70%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  pointer-events:none;
+}
+.cc-left{position:relative;z-index:1}
+.cc-eyebrow{
+  display:inline-flex;align-items:center;gap:.4em;
+  font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent-2);font-weight:600;
+}
+.cc-title{font-family:var(--font-display);font-weight:700;font-size:clamp(1.4rem,2.4vw,1.9rem);margin:.6em 0 .3em;line-height:1.15}
+.cc-sub{color:var(--ink-3);font-size:.95rem;margin:0 0 14px}
+.cc-progress{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.cc-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .6s var(--ease)}
+.cc-cover{
+  display:none;border-radius:18px;aspect-ratio:4/3;
+  position:relative;overflow:hidden;
+  box-shadow:0 16px 40px rgba(0,0,0,.35);
+}
+@media(min-width:720px){.cc-cover{display:block}}
+.cc-cover::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 70% 80%,rgba(255,255,255,.18),transparent 50%);
+}
 .feat .ic{
   width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
   background:rgba(255,138,61,.12);color:var(--accent);font-size:1.4rem;margin-bottom:14px;
@@ -383,6 +419,25 @@ button{font:inherit}
   position:relative;z-index:1;font-family:var(--font-display);font-weight:700;font-size:1.3rem;
   line-height:1.15;
 }
+.preview-btn{
+  position:absolute;z-index:2;
+  bottom:14px;right:14px;
+  width:38px;height:38px;border-radius:50%;
+  background:rgba(255,255,255,.95);
+  color:#3b1d05;font-size:.9rem;font-weight:700;
+  border:0;cursor:pointer;
+  display:grid;place-items:center;
+  box-shadow:0 4px 14px rgba(0,0,0,.3);
+  transition:transform .2s var(--ease), background .2s;
+  font-family:inherit;
+  padding:0;line-height:1;
+}
+.preview-btn:hover{transform:scale(1.1);background:#fff}
+.preview-btn.playing{background:var(--accent);color:#fff;animation:previewPulse 1.5s infinite}
+.preview-btn.playing::before{content:'⏸'}
+.preview-btn.playing::after{content:''}
+.preview-btn.playing > *{display:none}
+@keyframes previewPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,138,61,.6)}50%{box-shadow:0 0 0 10px rgba(255,138,61,0)}}
 .book-info{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
 .book-info h3{font-family:var(--font-display);font-weight:700;font-size:1.15rem;color:var(--ink);margin:0;line-height:1.2}
 .book-info .desc{color:var(--ink-3);font-size:.85rem;margin:0}
@@ -476,6 +531,15 @@ button{font:inherit}
 .tts-status.speaking .pulse{background:var(--accent);animation:pulse 1.4s infinite}
 .tts-status.paused .pulse{background:var(--ink-3)}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
+@keyframes bookOpen{
+  0%{transform:perspective(1200px) rotateY(-90deg) scale(.92);opacity:0}
+  60%{transform:perspective(1200px) rotateY(8deg) scale(1.02);opacity:1}
+  100%{transform:perspective(1200px) rotateY(0) scale(1);opacity:1}
+}
+.practice-flip{animation:bookOpen .7s var(--ease) both;transform-origin:left center}
+@media (prefers-reduced-motion: reduce){
+  .practice-flip{animation:none}
+}
 
 .controls{
   display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
@@ -577,6 +641,24 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
 }
 .toast.show{opacity:1;transform:translateY(0)}
 .toast .em{font-size:1.1rem}
+.toast.celebrate{
+  background:linear-gradient(135deg,rgba(255,138,61,.18),rgba(255,107,138,.18));
+  border:1px solid rgba(255,138,61,.4);
+  padding:14px 22px;font-size:1rem;
+  box-shadow:0 14px 40px rgba(255,138,61,.35);
+}
+.toast.achievement{
+  background:linear-gradient(135deg,rgba(255,209,102,.22),rgba(92,214,164,.18));
+  border:1px solid rgba(255,209,102,.45);
+  padding:14px 22px;
+  box-shadow:0 14px 40px rgba(255,209,102,.3);
+}
+.toast.achievement .em{font-size:1.4rem}
+
+/* Confetti canvas overlay */
+.confetti-canvas{
+  position:fixed;inset:0;z-index:150;pointer-events:none;
+}
 
 /* ---------- ACCESSIBILITY ---------- */
 @media (prefers-reduced-motion: reduce) {
@@ -675,7 +757,7 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
               <span data-key="ctaOpenLibrary">Open Library</span>
               <span class="arrow" aria-hidden="true">→</span>
             </button>
-            <button class="btn btn-ghost btn-lg" data-tab="practice">
+            <button class="btn btn-ghost btn-lg" data-tab="practice" data-action="try-sample">
               <span class="arrow" aria-hidden="true">▶</span>
               <span data-key="ctaTrySample">Try a sample</span>
             </button>
@@ -720,6 +802,21 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Continue reading card (hidden by default, shown when state.lastBookId is set and unfinished) -->
+    <div id="continue-card" class="continue-card hidden" style="margin-top:36px">
+      <div class="cc-left">
+        <span class="cc-eyebrow" data-key="continueEyebrow">📖 Continue reading</span>
+        <h2 class="cc-title" id="cc-title">-</h2>
+        <p class="cc-sub" id="cc-sub">-</p>
+        <div class="cc-progress"><div class="cc-progress-fill" id="cc-progress-fill" style="width:0%"></div></div>
+        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+          <button class="btn btn-primary" id="cc-resume"><span data-key="continueResume">Resume</span> <span class="arrow">→</span></button>
+          <button class="btn btn-ghost" data-tab="library" id="cc-pick"><span data-key="continuePick">Pick another</span></button>
+        </div>
+      </div>
+      <div class="cc-cover" id="cc-cover" aria-hidden="true"></div>
     </div>
 
     <div style="text-align:center;margin:60px auto 40px;max-width:760px">
@@ -930,6 +1027,149 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
 
 <!-- ========== TOAST ========== -->
 <div class="toast-wrap"><div class="toast" id="toast" role="status" aria-live="polite"></div></div>
+<canvas class="confetti-canvas" id="confetti" aria-hidden="true"></canvas>
+
+<!-- ========== AUDIO (page turn, soft tick) ========== -->
+<!-- Generated procedurally so we have no external deps. -->
+<script>
+/* Page turn: short noise burst, low-passed to feel papery */
+window.audioFX = (function(){
+  let ctx = null;
+  function ensure(){
+    if(ctx) return ctx;
+    try{
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }catch(e){ ctx = null; }
+    return ctx;
+  }
+  function pageTurn(){
+    const c = ensure(); if(!c) return;
+    // Resume on user gesture (browsers gate audio)
+    if(c.state === 'suspended') c.resume().catch(()=>{});
+    const dur = 0.28;
+    const buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
+    const data = buf.getChannelData(0);
+    // Brown noise shaped to sound like paper
+    let last = 0;
+    for(let i=0;i<data.length;i++){
+      const w = Math.random() * 2 - 1;
+      last = (last + 0.04 * w) / 1.04;
+      data[i] = last * 6;
+    }
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    const lp = c.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 1800; lp.Q.value = .8;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0, c.currentTime);
+    g.gain.linearRampToValueAtTime(0.18, c.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+    src.connect(lp).connect(g).connect(c.destination);
+    src.start();
+  }
+  function tick(freq=520, dur=0.06){
+    const c = ensure(); if(!c) return;
+    if(c.state === 'suspended') c.resume().catch(()=>{});
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = 'sine'; osc.frequency.value = freq;
+    g.gain.setValueAtTime(0, c.currentTime);
+    g.gain.linearRampToValueAtTime(0.12, c.currentTime + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+    osc.connect(g).connect(c.destination);
+    osc.start(); osc.stop(c.currentTime + dur);
+  }
+  function celebrate(){
+    // little arpeggio
+    [523, 659, 784, 1047].forEach((f,i) => setTimeout(()=>tick(f, 0.12), i*70));
+  }
+  function unlock(){
+    const c = ensure(); if(!c) return;
+    if(c.state === 'suspended') c.resume().catch(()=>{});
+  }
+  // Unlock on first user interaction
+  ['click','touchstart','keydown'].forEach(ev => {
+    document.addEventListener(ev, unlock, {once:true, passive:true});
+  });
+  return {pageTurn, tick, celebrate, unlock};
+})();
+</script>
+
+<script>
+/* Confetti - lightweight canvas particles */
+window.confettiFX = (function(){
+  let canvas, ctx, particles = [], raf = null, lastTime = 0;
+  function ensureCanvas(){
+    if(canvas) return;
+    canvas = document.getElementById('confetti');
+    ctx = canvas.getContext('2d');
+    resize();
+    window.addEventListener('resize', resize);
+  }
+  function resize(){
+    if(!canvas) return;
+    canvas.width = window.innerWidth * window.devicePixelRatio;
+    canvas.height = window.innerHeight * window.devicePixelRatio;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+  function burst(x, y, count=80){
+    ensureCanvas();
+    if(!ctx) return;
+    const colors = ['#ff8a3d','#ff6b8a','#39d3b6','#ffd166','#7d6bff','#5cd6a4'];
+    const W = window.innerWidth, H = window.innerHeight;
+    const cx = x ?? W/2, cy = y ?? H*0.4;
+    for(let i=0;i<count;i++){
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 4 + Math.random() * 9;
+      particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 6,
+        size: 6 + Math.random() * 6,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        rot: Math.random() * Math.PI,
+        vr: (Math.random()-0.5) * 0.3,
+        life: 1,
+      });
+    }
+    if(!raf){
+      lastTime = performance.now();
+      raf = requestAnimationFrame(loop);
+    }
+  }
+  function loop(t){
+    const dt = Math.min(0.05, (t - lastTime)/1000);
+    lastTime = t;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 18 * dt; // gravity
+      p.vx *= 0.99;
+      p.rot += p.vr;
+      p.life -= dt * 0.7;
+      if(p.life <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+      ctx.restore();
+    });
+    if(particles.length > 0){
+      raf = requestAnimationFrame(loop);
+    } else {
+      raf = null;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  return {burst};
+})();
+</script>
 
 <script>
 /* =====================================================
@@ -1032,6 +1272,12 @@ const STRINGS = {
     toastReset: 'Progress reset',
     toastNarrator: (n) => `Narrator: ${n}`,
     toastSwitched: (n) => `Switched to ${n}`,
+    toastAchievement: 'Achievement unlocked',
+    toastAchievementRo: 'Realizare nouă',
+    toastWelcomeBack: 'Welcome back!',
+    toastWelcomeBackRo: 'Bun venit înapoi!',
+    toastContinue: 'Continue where you left off?',
+    toastContinueRo: 'Continui de unde ai rămas?',
     xpLevelNames: ['Reader 1','Reader 2','Reader 3','Bookworm','Story Hunter','Word Wizard','Reading Master'],
     achFirst: 'First steps',
     achFirstDesc: 'Read your first story',
@@ -1053,7 +1299,10 @@ const STRINGS = {
     achBooks10Desc: 'Finish 10 different books',
     achBilingual: 'Bilingual reader',
     achBilingualDesc: 'Read stories in both languages',
-    footerCopy: '© 2026 ReadAlong Kids · Built for ages 5-10',
+    footerCopy: '© 2026 ReadAlong Kids · Built for ages 5–10',
+    continueEyebrow: '📖 Continue reading',
+    continueResume: 'Resume',
+    continuePick: 'Pick another',
     splashTitle: 'Choose your language',
     splashLead: 'Alege limba',
     splashEn: 'English',
@@ -1068,7 +1317,7 @@ const STRINGS = {
     phoneMockup: {
       bookMeta: 'Level J · 142 words · 6 min',
       bookTitle: 'The Brave Little Fox',
-      reading: 'Reading along with Mia…',
+      reading: 'Reading along with Mia...',
       nowReading: 'The fox ran through the forest.',
       nowPill: 'NOW',
       pillAi: 'AI',
@@ -1082,7 +1331,7 @@ const STRINGS = {
     phoneBookTitle: 'The Brave Little Fox',
     phoneBookMeta: 'Level J · 142 words · 6 min',
     phonePillAi: 'AI',
-    phoneReading: 'Reading along with Mia…',
+    phoneReading: 'Reading along with Mia...',
     phoneNowPill: 'NOW',
     phoneNowReading: 'The fox ran through the forest.',
     phoneReaderName: 'Mia · Age 7',
@@ -1181,6 +1430,12 @@ const STRINGS = {
     toastReset: 'Progres resetat',
     toastNarrator: (n) => `Narator: ${n}`,
     toastSwitched: (n) => `Schimbat pe ${n}`,
+    toastAchievement: 'Realizare nouă',
+    toastAchievementRo: 'Realizare nouă',
+    toastWelcomeBack: 'Bun venit înapoi!',
+    toastWelcomeBackRo: 'Bun venit înapoi!',
+    toastContinue: 'Continui de unde ai rămas?',
+    toastContinueRo: 'Continui de unde ai rămas?',
     xpLevelNames: ['Cititor 1','Cititor 2','Cititor 3','Cititor avid','Vânztor de povești','Mag al cuvintelor','Maestru al cititului'],
     achFirst: 'Primii pași',
     achFirstDesc: 'Citește prima ta poveste',
@@ -1202,7 +1457,10 @@ const STRINGS = {
     achBooks10Desc: 'Termină 10 cărți diferite',
     achBilingual: 'Cititor bilingv',
     achBilingualDesc: 'Citește povești în ambele limbi',
-    footerCopy: '© 2026 ReadAlong Kids · Creat pentru vârste 5-10',
+    footerCopy: '© 2026 ReadAlong Kids · Creat pentru vârste 5–10',
+    continueEyebrow: '📖 Contină cititul',
+    continueResume: 'Continuă',
+    continuePick: 'Alege altă',
     splashTitle: 'Alege limba',
     splashLead: 'Choose your language',
     splashEn: 'English',
@@ -1217,7 +1475,7 @@ const STRINGS = {
     phoneMockup: {
       bookMeta: 'Nivel J · 142 cuvinte · 6 min',
       bookTitle: 'Vulpea cea mică și curajoasă',
-      reading: 'Citește împreună cu Mia…',
+      reading: 'Citește împreună cu Mia...',
       nowReading: 'Vulpea a trecut prin pădure.',
       nowPill: 'ACUM',
       pillAi: 'AI',
@@ -1231,7 +1489,7 @@ const STRINGS = {
     phoneBookTitle: 'Vulpea cea mică și curajoasă',
     phoneBookMeta: 'Nivel J · 142 cuvinte · 6 min',
     phonePillAi: 'AI',
-    phoneReading: 'Citește împreună cu Mia…',
+    phoneReading: 'Citește împreună cu Mia...',
     phoneNowPill: 'ACUM',
     phoneNowReading: 'Vulpea a trecut prin pădure.',
     phoneReaderName: 'Mia · 7 ani',
@@ -1661,15 +1919,15 @@ When Lily's mother comes home, she sees the kitten. "Whose kitten is this?" she 
 The kitten runs to the small girl. It rubs its head on her shoe. It mews and mews. Lily smiles. She is sad to see the kitten go. But she is happy, too. Some things are lost only for a little while.`,
     textRo:`O fetiță pe nume Iris găsește o pisicuță mică sub prispă. E singură. E foarte speriată.
 
-„Te rog, pisicuță mică," zice Iris. „Vino acasă cu mine. Am să am grijă de tine."
+"Te rog, pisicuță mică," zice Iris. "Vino acasă cu mine. Am să am grijă de tine."
 
 Pisicuța nu se mișcă. E prea speriată. Iris se așază pe treaptă și așteaptă. Nu scoate niciun sunet. După mult timp, pisicuța face un pas mic. Apoi încă unul. Curând e în poala Irisei și toarce.
 
-„Ești în siguranță acum," șoptește Iris. O duce în casă și îi dă un castron cu lapte cald. Pisicuța bea și bea. Ochii i se închid. Aduce pe pătura moale a Irisei.
+"Ești în siguranță acum," șoptește Iris. O duce în casă și îi dă un castron cu lapte cald. Pisicuța bea și bea. Ochii i se închid. Aduce pe pătura moale a Irisei.
 
-Când mama Irisei vine acasă, vede pisicuța. „A cui e pisicuța asta?" întreabă.
+Când mama Irisei vine acasă, vede pisicuța. "A cui e pisicuța asta?" întreabă.
 
-„Cred că e pierdută," zice Iris. „O să o ajutăm să-și găsească casa." A doua zi, pun un semn în fereastră. Până după-amiază, o fetiță e la ușă. Plânge. Și-a căutat pisicuța trei zile întregi.
+"Cred că e pierdută," zice Iris. "O să o ajutăm să-și găsească casa." A doua zi, pun un semn în fereastră. Până după-amiază, o fetiță e la ușă. Plânge. Și-a căutat pisicuța trei zile întregi.
 
 Pisicuța aleargă la fetiță. Își freacă capul de pantoful ei. Miaună și miaună. Iris zâmbește. E tristă să plece pisicuța. Dar e și fericită. Unele lucruri sunt pierdute doar pentru o vreme.`
   },
@@ -1699,11 +1957,11 @@ Theo smiles. He understands now. The wishes were not for him. They were for the 
 
 Sub copac, găsește o cutiuță mică de lemn, pe jumătate îngropată în frunze. E închisă cu o închizătoare mică și aurie. Tudor o scoate cu grijă. Șterge murdăria cu mâneca. Deschide închizătoarea.
 
-În cutie sunt șapte pietre netede. Fiecare e vopsită într-o culoare diferită: roșu, albastru, verde, galben, mov, portocaliu și argintiu. Pe fundul cutiei, e un bilet. Scrie: „Pentru următorul copil curios. Fiecare piatră e o dorință. Folosește-le cu înțelepciune."
+În cutie sunt șapte pietre netede. Fiecare e vopsită într-o culoare diferită: roșu, albastru, verde, galben, mov, portocaliu și argintiu. Pe fundul cutiei, e un bilet. Scrie: "Pentru următorul copil curios. Fiecare piatră e o dorință. Folosește-le cu înțelepciune."
 
 Tudor nu-i vine să-și creadă ochilor. Șapte dorinți! Aleargă în casă să-i arate surorii lui. Dar când se întoarce afară, pietrele au dispărut. În locul lor e un singur ghindă.
 
-Tudor e dezamăgit. Dar apoi vede ceva scris pe ghindă, cu litere mici: „Plantează-mă."
+Tudor e dezamăgit. Dar apoi vede ceva scris pe ghindă, cu litere mici: "Plantează-mă."
 
 Așa că Tudor plantează ghindă într-un ghiveci mic. O udă în fiecare zi. Până la sfârșitul verii, a crescut un stejar mic. Nu e foarte înalt. Dar frunzele lui sunt șapte culori, exact ca pietrele.
 
@@ -1743,9 +2001,9 @@ A păstrat tradiția oricum. În fiecare sâmbătă, prima persoană primește p
 
 Sâmbăta asta, prima persoană la ușă e o fată pe care domnul Aldous nu a mai văzut-o niciodată. Are poate șaisprezece ani, cu ochi obosiți și un palton prea mare pentru ea. Se uită la pâinea de sâmbătă ca la o mică, caldă minune.
 
-„Chiar e pentru mine?" întreabă. Vocea ei e mică.
+"Chiar e pentru mine?" întreabă. Vocea ei e mică.
 
-„Pentru tine," zice dl. Aldous. Îi pune pâinea ușor în mâini. „Și pentru cineva cu care o împarți."
+"Pentru tine," zice dl. Aldous. Îi pune pâinea ușor în mâini. "Și pentru cineva cu care o împarți."
 
 Fata dă din cap. Nu zâmbește. Dar ceva în umerii ei se înmoaie, doar puțin. Pleacă pe strada Arțarilor, ținând pâinea la piept, unde e cel mai cald. Dl. Aldous o urmărește cum pleacă. Apoi intră înapoi, și începe să coacă pâinea de săptămâna viitoare.`
   },
@@ -1754,8 +2012,8 @@ Fata dă din cap. Nu zâmbește. Dar ceva în umerii ei se înmoaie, doar puțin
     level:4, title:"The Lighthouse Keeper's Letter",
     titleRo:'Scrisoarea paznicului de far',
     cover:'linear-gradient(135deg,#5b8cff,#7d6bff)',
-    desc:'A man writes one letter each night — and learns what he cannot say.',
-    descRo:'Un bărbat scrie o scrisoare în fiecare noapte — și învață ce nu poate spune.',
+    desc:'A man writes one letter each night - and learns what he cannot say.',
+    descRo:'Un bărbat scrie o scrisoare în fiecare noapte - și învață ce nu poate spune.',
     narrator:'iris',
     words:562, wpmTarget:130,
     text:`The lighthouse stood at the edge of the island, where the rocks met the cold black water. Mr. Fenwick had kept it for twenty-three years. He lived alone with his cat and his books and his radio, which received only static and a single station that played classical music on Sunday afternoons.
@@ -1774,7 +2032,7 @@ One night, in November, a great storm came. The wind shook the lamp. The radio f
 
 When the storm had passed, the morning was very clear. Mr. Fenwick sat down at his desk to write his letter. He picked up the pen. He wrote, "Dear." He stopped.
 
-He wrote, "Dear —" and stopped again.
+He wrote, "Dear -" and stopped again.
 
 Then, very slowly, he began to write. Not the careful words he had written before. Not the weather, not the boats, not the light. He wrote, "I miss you. I miss you so much. I am sorry I could not say it before. I am sorry I did not know how." He wrote, "Please forgive me." He wrote, "I am still here." He wrote for a long time, the pen moving across the page in long uneven lines. The cat slept at his feet. The light turned slowly overhead.
 
@@ -1791,15 +2049,15 @@ Nu-i răspundea. Încercase o dată, anul în care soția lui murise. Dar cuvint
 
 Primele fuseseră către soția lui. Îi povestea despre lumină, și cum lampa arunca umbre pe pereți. Îi spunea că pisica învățase să doarmă pe scaunul ei, care încă stătea lângă fereastră, gol. Îi spusese că plantase lalele primăvara, dar pescărușii mâncaseră bulbii. Nu-i spusese că îi era dor de ea. Nu știa cum.
 
-Mai târziu, scrisorile erau către fiica lui. Scria despre vreme, și despre bărcile pe care le vedea, și despre furtunile care veneau în octombrie. Descria lumina, și cum se simțea să urci scara în întuneric. Scria: „Sper că ești bine." Scria: „Copiii trebuie că au crescut mult." Scria: „Mă gândesc la tine." Nu spunea niciodată ce voia să spună. Nu găsea cuvintele.
+Mai târziu, scrisorile erau către fiica lui. Scria despre vreme, și despre bărcile pe care le vedea, și despre furtunile care veneau în octombrie. Descria lumina, și cum se simțea să urci scara în întuneric. Scria: "Sper că ești bine." Scria: "Copiii trebuie că au crescut mult." Scria: "Mă gândesc la tine." Nu spunea niciodată ce voia să spună. Nu găsea cuvintele.
 
 Într-o noapte, în noiembrie, a venit o furtună mare. Vântul a zguduit lampa. Radioul a amuțit. Dl. Fenwick a urcat scara în întuneric, ținându-se de balustradă cu ambele mâini, pisica pe urmele lui. A ajuns în camera lămpii și a aprins marea lampă. Se legăna, aruncând umbre sălbatice pe pereți. Insula a dispărut în stropii de apă.
 
-Când furtuna trecuse, dimineața era foarte senină. Dl. Fenwick s-a așezat la birou ca să-și scrie scrisoarea. A luat stiloul. A scris: „Dragă." S-a oprit.
+Când furtuna trecuse, dimineața era foarte senină. Dl. Fenwick s-a așezat la birou ca să-și scrie scrisoarea. A luat stiloul. A scris: "Dragă." S-a oprit.
 
-A scris: „Dragă —" și s-a oprit din nou.
+A scris: "Dragă -" și s-a oprit din nou.
 
-Apoi, foarte încet, a început să scrie. Nu cuvintele atente pe care le scrisese înainte. Nu vremea, nu bărcile, nu lumina. A scris: „Îmi ești dor. Îmi ești atât de dor. Îmi pare rău că nu am putut să spun asta mai devreme. Îmi pare rău că nu am știut cum." A scris: „Te rog iartă-mă." A scris: „Încă sunt aici." A scris mult timp, stiloul mișcându-se pe pagină în linii lungi și inegale. Pisica dormea la picioarele lui. Lumina se rotea încet deasupra.
+Apoi, foarte încet, a început să scrie. Nu cuvintele atente pe care le scrisese înainte. Nu vremea, nu bărcile, nu lumina. A scris: "Îmi ești dor. Îmi ești atât de dor. Îmi pare rău că nu am putut să spun asta mai devreme. Îmi pare rău că nu am știut cum." A scris: "Te rog iartă-mă." A scris: "Încă sunt aici." A scris mult timp, stiloul mișcându-se pe pagină în linii lungi și inegale. Pisica dormea la picioarele lui. Lumina se rotea încet deasupra.
 
 Când a terminat, a citit scrisoarea. A împăturit-o într-un pătrat. A strecurat-o într-un plic. A scris adresa fiicei lui pe față. A mers la debarcader, unde o barcă poștală descărca. I-a înmânat scrisoarea poștașului.
 
@@ -1843,7 +2101,7 @@ Mira a găsit camera când avea șaptesprezece ani. Cautase un loc liniștit und
 
 Harta era a unui oraș pe care nu-l văzuse niciodată, dar pe care l-a recunoscut imediat. Era orașul ei, cel în care trăia. Îi cunoștea fiecare stradă, fiecare colț. Le umblase de când era mică. Și totuși, harta nu era a orașului așa cum era. Harta era a orașului așa cum fusese, a orașului așa cum devenea, și a orașului așa cum încă putea să fie, toate deodată. Străzi din trecut se suprupățeau cu străzi ce încă nu veniseră. Clădiri care nu fuseseră încă construite stăteau alături de clădiri care fuseseră demolate cu ani în urmă. Un râu care nu mai curgea era desenat în tuș albastru atent, trecând prin subsolul unei cafenele care se deschisese primăvara trecută.
 
-La marginea hărții, într-un scris atât de mic încât a trebuit să se aplece ca să-l citească, erau cuvintele: „Pentru Mira. Când va fi gata."
+La marginea hărții, într-un scris atât de mic încât a trebuit să se aplece ca să-l citească, erau cuvintele: "Pentru Mira. Când va fi gata."
 
 Mira a stat în cameră mult timp. Nu înțelegea ce privea. Nu înțelegea cine o lăsase acolo, sau de ce. Dar înțelegea, cu partea din ea care nu era mintea ei, că harta nu era terminată, și că ea era menită s-o termine.
 
@@ -1851,7 +2109,7 @@ S-a întors sâmbăta următoare. Și sâmbăta de după aceea. A adus stilouri,
 
 Harta se schimba pe măsură ce desena. Străzi vechi reaăpărea, de parcă își aminteau de sine. Clădiri pe care le desenase ca fiind noi se revelau, sub liniile ei atente, ca fiind mult mai vechi decât crezuse. Un parc pe care-l crezuse parc se dovedea, în hartă, că fusese trei parcuri pe rând, și o grădină privată, și cândva, demult, o fermă mică.
 
-Într-o zi, a observat ceva ce nu mai văzuse înainte. În colțul hărții, într-un scris pe care nu-l recunoștea, dar pe care cumva știa că e al ei, era un bilet. Suna: „Harta nu e a orașului. Harta e a persoanei care o desenează. Vei ști când ai terminat."
+Într-o zi, a observat ceva ce nu mai văzuse înainte. În colțul hărții, într-un scris pe care nu-l recunoștea, dar pe care cumva știa că e al ei, era un bilet. Suna: "Harta nu e a orașului. Harta e a persoanei care o desenează. Vei ști când ai terminat."
 
 Mira s-a oprit. Și-a pus stiloul. S-a uitat la hartă, la care lucrase aproape un an. S-a uitat la râul care nu mai curgea. S-a uitat la locul de joacă pe care-l desenase în linii atât de atente. S-a uitat la cafeneaua în al cărei subsol curgea râul, și a înțeles, dintr-o dată, că harta nu era despre oraș. Era despre ea.
 
@@ -1872,6 +2130,11 @@ const defaultState = {
   globalNarrator:null, // if set, override per-book narrator for all books
   // lang is null by default - forces splash on first visit
   lang: null,
+  unlocked: [], // achievement ids already celebrated
+  lastBookId: null, // most recently opened book (for "Continue reading" on home)
+  lastBookIdx: 0,  // word index where user paused
+  lastBookAt: 0,
+  favorites: {}, // {bookId: true}
 };
 let state = loadState();
 
@@ -1907,6 +2170,9 @@ function showView(name){
   if(name === 'practice') renderPractice();
   if(name === 'library') renderLibrary();
   if(name === 'progress') renderProgress();
+  if(name === 'home') renderContinueCard();
+  // Stop any preview when navigating away from library
+  if(name !== 'library') stopPreview();
   window.scrollTo({top:0, behavior:'instant'});
 }
 
@@ -1915,8 +2181,15 @@ document.addEventListener('click', (e)=>{
   if(t){
     e.preventDefault();
     const tab = t.dataset.tab;
-    if(tab === 'practice'){
-      // No-op, renderPractice handles missing book
+    // Handle "Try a sample" CTA - opens the first book of current language
+    if(tab === 'practice' && t.dataset.action === 'try-sample'){
+      const lang = state.lang || 'en';
+      const firstBook = STORIES.find(s => s.lang === lang || (lang === 'en' ? !!s.text : !!s.textRo));
+      if(firstBook){
+        openBook(firstBook.id);
+        if(typeof audioFX !== 'undefined') audioFX.pageTurn();
+        return;
+      }
     }
     showView(tab);
   }
@@ -1983,6 +2256,7 @@ function renderLibrary(){
         <div class="book-cover" style="background:${b.cover}">
           <span class="lvl-badge">${lang === 'ro' ? 'Nivel' : 'Level'} ${b.level}</span>
           <span class="title-on-cover">${title}</span>
+          <button type="button" class="preview-btn" data-preview="${b.id}" aria-label="${lang === 'ro' ? 'Ascultă previzualizare' : 'Preview audio'}" title="${lang === 'ro' ? 'Ascultă 5 sec' : 'Listen 5s'}">▶</button>
         </div>
         <div class="book-info">
           <h3>${title}</h3>
@@ -1998,9 +2272,62 @@ function renderLibrary(){
   }).join('');
   grid.querySelectorAll('.book-card').forEach(card=>{
     card.addEventListener('click', ()=>{
+      stopPreview();
       openBook(card.dataset.book);
     });
   });
+
+  // Wire preview buttons
+  grid.querySelectorAll('.preview-btn').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation(); // don't trigger book open
+      const id = btn.dataset.preview;
+      const book = STORIES.find(s => s.id === id);
+      if(!book) return;
+      const isPlaying = btn.classList.contains('playing');
+      if(isPlaying){
+        stopPreview();
+        return;
+      }
+      stopPreview(); // stop any other preview first
+      startPreview(book, btn);
+    });
+  });
+}
+
+/* ---------- Preview audio (5 seconds from the start of a book) ---------- */
+let previewUtter = null;
+let previewBtn = null;
+let previewTimer = null;
+async function startPreview(book, btn){
+  if(typeof audioFX === 'undefined') return;
+  // Pick narrator voice for the book's language
+  const lang = book.lang || 'en';
+  const {voice, narrator} = await pickNarratorVoice(book.narrator);
+  // Get first ~2 sentences from the right language
+  const text = (state.lang === 'ro' ? book.textRo : book.text) || book.text;
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  const preview = sentences.slice(0, 2).join(' ').trim();
+  const u = new SpeechSynthesisUtterance(preview);
+  if(voice) u.voice = voice;
+  u.lang = (state.lang === 'ro') ? 'ro-RO' : 'en-US';
+  u.rate = Math.max(0.5, Math.min(2.0, narrator.rateDefault * 1.1));
+  u.pitch = narrator.pitch;
+  u.onend = () => stopPreview();
+  u.onerror = () => stopPreview();
+  previewUtter = u;
+  previewBtn = btn;
+  btn.classList.add('playing');
+  // 6-second safety timeout (in case onend doesn't fire on some engines)
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(stopPreview, 7000);
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
+function stopPreview(){
+  if(previewTimer){ clearTimeout(previewTimer); previewTimer = null; }
+  if(previewBtn){ previewBtn.classList.remove('playing'); previewBtn = null; }
+  if(previewUtter){ try{ window.speechSynthesis.cancel(); }catch(e){} previewUtter = null; }
 }
 
 /* ---------- Practice / TTS ---------- */
@@ -2017,6 +2344,13 @@ let isPaused = false;
 function openBook(id){
   const book = STORIES.find(s=>s.id===id);
   if(!book) return;
+  // Save lastBook state for "continue reading"
+  state.lastBookId = id;
+  state.lastBookIdx = 0;
+  state.lastBookAt = Date.now();
+  saveState();
+  // Play page-turn sound
+  if(typeof audioFX !== 'undefined') audioFX.pageTurn();
   state.currentBookId = id;
   saveState();
   showView('practice');
@@ -2103,7 +2437,17 @@ function renderPractice(){
   }
   currentBook = book;
   if(empty) empty.classList.add('hidden');
-  if(content) content.classList.remove('hidden');
+  if(content){
+    content.classList.remove('hidden');
+    // Apply flip animation only when changing to a different book
+    if(state._lastAnimatedBook !== book.id){
+      content.classList.remove('practice-flip');
+      // Force reflow to restart animation
+      void content.offsetWidth;
+      content.classList.add('practice-flip');
+      state._lastAnimatedBook = book.id;
+    }
+  }
   const lang = state.lang || 'en';
   const title = lang === 'ro' ? (book.titleRo || book.title) : book.title;
   if(titleEl) titleEl.textContent = title;
@@ -2330,7 +2674,7 @@ function speakChunk(sentences, idx, voice, speed, pitch, narrator){
 
   const utter = new SpeechSynthesisUtterance(sentence);
   if(voice) utter.voice = voice;
-  // Set lang explicitly to match book — some engines need this to pick the right pronunciation
+  // Set lang explicitly to match book - some engines need this to pick the right pronunciation
   utter.lang = (currentBook?.lang === 'ro' || state.lang === 'ro') ? 'ro-RO' : 'en-US';
   utter.rate = speed;
   utter.pitch = pitch;
@@ -2385,7 +2729,17 @@ function tickSessionTimer(){
     const m = Math.floor(sec/60), s = sec%60;
     document.getElementById('fin-time').textContent = `${m}:${String(s).padStart(2,'0')}`;
   }, 500);
+  // Also auto-save reading position every 5 seconds
+  positionSaveInterval = setInterval(()=>{
+    if(isSpeaking && currentBook && activeWordIdx >= 0){
+      state.lastBookId = currentBook.id;
+      state.lastBookIdx = activeWordIdx;
+      state.lastBookAt = Date.now();
+      saveState();
+    }
+  }, 5000);
 }
+let positionSaveInterval = null;
 
 function pauseTTS(){
   if(!isSpeaking) return;
@@ -2405,6 +2759,7 @@ function stopTTS(){
   }
   ttsUtterance = null;
   clearInterval(sessionTimerInterval);
+  if(positionSaveInterval){ clearInterval(positionSaveInterval); positionSaveInterval = null; }
   document.getElementById('play-icon').textContent = '▶';
   document.getElementById('play-label').textContent = t('playRead');
 }
@@ -2478,7 +2833,35 @@ function showFinishCard(book, wpm, coverage, xp, minutes){
   document.getElementById('xp-earned').textContent = xp;
   document.getElementById('finish-card').classList.remove('hidden');
   document.getElementById('finish-card').scrollIntoView({behavior:'smooth', block:'center'});
-  showToast(`🎉 ${t('finishXp', xp)}`, 2500);
+  showToast(`🎉 ${t('finishXp', xp)}`, 2500, 'celebrate');
+  // Confetti + sound celebration
+  if(typeof confettiFX !== 'undefined') confettiFX.burst(window.innerWidth/2, window.innerHeight/2, 100);
+  if(typeof audioFX !== 'undefined') audioFX.celebrate();
+}
+
+function checkAchievements(){
+  // Returns newly unlocked achievements (compared to previously unlocked set)
+  if(!state.unlocked) state.unlocked = [];
+  const newly = [];
+  ACHIEVEMENTS.forEach(a => {
+    const wasUnlocked = state.unlocked.includes(a.id);
+    const isUnlocked = a.check(state);
+    if(isUnlocked && !wasUnlocked){
+      newly.push(a);
+      state.unlocked.push(a.id);
+    }
+  });
+  return newly;
+}
+
+function celebrateAchievement(a){
+  const lang = state.lang || 'en';
+  const name = t(a.nameKey);
+  const desc = t(a.descKey);
+  showToast(`${a.icon} ${lang === 'ro' ? 'Realizare nouă' : 'Achievement unlocked'}: ${name}`, 3500, 'achievement');
+  // Smaller confetti burst, single high tick
+  if(typeof confettiFX !== 'undefined') confettiFX.burst(window.innerWidth/2, window.innerHeight/3, 50);
+  if(typeof audioFX !== 'undefined') audioFX.tick(880, 0.18);
 }
 
 function saveSession(book, wpm, coverage, xp, minutes){
@@ -2497,6 +2880,14 @@ function saveSession(book, wpm, coverage, xp, minutes){
   state.sessions = state.sessions.slice(0, 50);
   // Streak
   updateStreak();
+  // Check achievements
+  const newly = checkAchievements();
+  if(newly.length){
+    // Defer to after state is saved + render
+    setTimeout(() => {
+      newly.forEach((a, i) => setTimeout(() => celebrateAchievement(a), i * 1200));
+    }, 1200);
+  }
   saveState();
   refreshStreakPill();
 }
@@ -2672,12 +3063,18 @@ function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;',
 
 /* ---------- Toast ---------- */
 let toastTimer = null;
-function showToast(text, ms=2200){
+function showToast(text, ms=2200, variant){
   const t = document.getElementById('toast');
-  t.innerHTML = `<span class="em">✨</span><span>${text}</span>`;
+  const em = variant === 'achievement' ? '🏆' : variant === 'celebrate' ? '🎉' : '✨';
+  t.innerHTML = `<span class="em">${em}</span><span>${text}</span>`;
+  t.classList.remove('celebrate','achievement');
+  if(variant) t.classList.add(variant);
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), ms);
+  toastTimer = setTimeout(()=>{
+    t.classList.remove('show');
+    setTimeout(()=>t.classList.remove('celebrate','achievement'), 250);
+  }, ms);
 }
 
 /* ---------- Buttons ---------- */
@@ -2729,6 +3126,64 @@ document.getElementById('btn-reset').addEventListener('click', ()=>{
 });
 
 /* ---------- Init ---------- */
+function renderContinueCard(){
+  const card = document.getElementById('continue-card');
+  if(!card) return;
+  // Hide if no lastBook or already completed
+  const lastId = state.lastBookId;
+  const lastSession = state.sessions && state.sessions.find(s => s.bookId === lastId);
+  const lang = state.lang || 'en';
+  // If the last session is for lastBook AND it was finished, hide
+  // Otherwise show, but only if lastBook matches current language
+  if(!lastId){
+    card.classList.add('hidden');
+    return;
+  }
+  const book = STORIES.find(s => s.id === lastId);
+  if(!book){
+    card.classList.add('hidden');
+    return;
+  }
+  // Only show in matching language
+  const bookHasLang = (lang === 'ro' ? !!book.textRo : !!book.text);
+  if(!bookHasLang){
+    card.classList.add('hidden');
+    return;
+  }
+  // If session says we finished this book already (lastIdx was at end), hide
+  const wp = state.wordProgress[lastId] || {lastIdx:0};
+  if(lastSession && wp.lastIdx >= book.words * 0.95){
+    card.classList.add('hidden');
+    return;
+  }
+  const title = lang === 'ro' ? (book.titleRo || book.title) : book.title;
+  const pct = Math.min(99, Math.round((wp.lastIdx / book.words) * 100));
+  document.getElementById('cc-title').textContent = title;
+  const lastTime = state.lastBookAt ? (() => {
+    const diff = Date.now() - state.lastBookAt;
+    const min = Math.floor(diff/60000);
+    if(min < 1) return lang === 'ro' ? 'chiar acum' : 'just now';
+    if(min < 60) return lang === 'ro' ? `acum ${min} min` : `${min}m ago`;
+    const hr = Math.floor(min/60);
+    if(hr < 24) return lang === 'ro' ? `acum ${hr} ${hr===1?'oră':'ore'}` : `${hr}h ago`;
+    const day = Math.floor(hr/24);
+    return lang === 'ro' ? `acum ${day} ${day===1?'zi':'zile'}` : `${day}d ago`;
+  })() : '';
+  document.getElementById('cc-sub').textContent = `${lang === 'ro' ? 'Nivel' : 'Level'} ${book.level} · ${pct}% · ${lastTime}`;
+  document.getElementById('cc-progress-fill').style.width = pct + '%';
+  const coverEl = document.getElementById('cc-cover');
+  coverEl.style.background = book.cover;
+  card.classList.remove('hidden');
+  // Wire resume button
+  const resumeBtn = document.getElementById('cc-resume');
+  resumeBtn.onclick = () => {
+    state.currentBookId = lastId;
+    saveState();
+    showView('practice');
+  };
+  document.getElementById('cc-pick').onclick = () => showView('library');
+}
+
 function init(){
   // Splash logic: hide if lang already chosen
   if(!maybeShowSplash()){
