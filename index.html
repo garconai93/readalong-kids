@@ -2057,17 +2057,23 @@ async function startTTS(){
     return;
   }
   if(isSpeaking) return;
-  // Determine narrator for this book (user override > book default > first narrator)
-  const narratorId = (state.narratorPrefs && state.narratorPrefs[currentBook.id])
-                  || currentBook.narrator
-                  || NARRATORS[0].id;
+  // Determine narrator for this book (user override > book default > first narrator matching current lang)
+  const uiLang = state.lang || 'en';
+  const availableNarrators = NARRATORS.filter(n => n.lang === uiLang);
+  let narratorId = (state.narratorPrefs && state.narratorPrefs[currentBook.id]) || currentBook.narrator;
+  // Ensure narrator matches current UI language
+  if(!availableNarrators.find(n => n.id === narratorId)) {
+    narratorId = availableNarrators[0]?.id || NARRATORS[0].id;
+  }
   const {voice, narrator} = await pickNarratorVoice(narratorId);
   currentNarrator = narrator;
   const userSpeed = parseFloat(document.getElementById('speed-sel').value) || 1;
   // Effective rate = narrator baseline × user speed control
   const speed = Math.max(0.5, Math.min(2.0, narrator.rateDefault * userSpeed));
   const pitch = narrator.pitch;
-  const text = currentBook.text;
+  // CRITICAL: pick the text in the current UI language
+  const lang = state.lang || 'en';
+  const text = lang === 'ro' ? (currentBook.textRo || currentBook.text) : currentBook.text;
   // Use sentence-based chunks so we can highlight word-by-word via boundary events
   const sentences = text.match(/[^.!?]+[.!?]+|\S+/g) || [text];
 
@@ -2092,6 +2098,8 @@ function speakChunk(sentences, idx, voice, speed, pitch, narrator){
 
   const utter = new SpeechSynthesisUtterance(sentence);
   if(voice) utter.voice = voice;
+  // Set lang explicitly to match book — some engines need this to pick the right pronunciation
+  utter.lang = (currentBook?.lang === 'ro' || state.lang === 'ro') ? 'ro-RO' : 'en-US';
   utter.rate = speed;
   utter.pitch = pitch;
   utter.onboundary = (ev)=>{
@@ -2188,7 +2196,18 @@ function highlightWord(idx){
 function speakSingle(word){
   // Brief isolated pronunciation when user taps a word
   const u = new SpeechSynthesisUtterance(word);
-  u.rate = 0.9;
+  u.lang = (currentBook?.lang === 'ro' || state.lang === 'ro') ? 'ro-RO' : 'en-US';
+  // Try to use current narrator's voice too
+  if(currentNarrator){
+    const r = currentNarrator.prefs;
+    const voices = window.speechSynthesis.getVoices();
+    for(const test of r){
+      const found = voices.find(test);
+      if(found){ u.voice = found; break; }
+    }
+  }
+  u.rate = (currentNarrator?.rateDefault || 0.85) * 0.95;
+  u.pitch = currentNarrator?.pitch || 1.0;
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(u);
 }
