@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#0f1424" />
 <title>ReadAlong Kids — AI Read-Aloud Companion for Ages 5–10</title>
-<meta name="description" content="Turn 10 minutes of daily reading practice into visible fluency gains. AI read-aloud sessions, leveled library, weekly parent reports." />
+<meta name="description" content="Turn 10 minutes of daily reading practice into visible fluency gains. AI read-aloud, leveled library, real-time word highlighting, parent dashboard." />
 <meta property="og:title" content="ReadAlong Kids — AI Read-Aloud Companion" />
 <meta property="og:description" content="Turn 10 minutes of daily reading practice into visible fluency gains." />
 <meta property="og:type" content="website" />
@@ -25,12 +25,13 @@
   --ink:#f6f4ee;
   --ink-2:#c7c9d6;
   --ink-3:#8b90a8;
-  --accent:#ff8a3d;        /* warm orange - playful, parental */
+  --accent:#ff8a3d;
   --accent-2:#ffb86b;
-  --teal:#39d3b6;           /* trust accent */
+  --teal:#39d3b6;
   --rose:#ff6b8a;
   --gold:#ffd166;
   --ok:#5cd6a4;
+  --danger:#ff6b8a;
   --shadow-1:0 8px 30px rgba(0,0,0,.35);
   --shadow-2:0 24px 80px rgba(0,0,0,.45);
   --radius:18px;
@@ -40,6 +41,7 @@
   --gutter:clamp(20px,4vw,40px);
   --font-sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --font-display:'Fraunces','Iowan Old Style',Georgia,serif;
+  --ease:cubic-bezier(.2,.8,.2,1);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -55,32 +57,11 @@ body{
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
   overflow-x:hidden;
+  min-height:100vh;
 }
 img,svg{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 button{font:inherit}
-
-/* ---------- Layout ---------- */
-.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
-section{padding:clamp(64px,9vw,120px) 0;position:relative}
-h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:0}
-h1{font-size:clamp(2.4rem,5.6vw,4.6rem)}
-h2{font-size:clamp(1.8rem,3.6vw,2.8rem);margin-bottom:.5em}
-h3{font-size:clamp(1.15rem,1.8vw,1.4rem)}
-p{margin:0 0 1em;color:var(--ink-2)}
-.eyebrow{
-  display:inline-flex;align-items:center;gap:.5em;
-  font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--accent-2);font-weight:600;
-  padding:.45em .9em;border:1px solid rgba(255,184,107,.25);border-radius:999px;
-  background:rgba(255,138,61,.08);
-}
-.lead{font-size:clamp(1.05rem,1.4vw,1.2rem);color:var(--ink-2);max-width:62ch}
-.muted{color:var(--ink-3)}
-.gradient-text{
-  background:linear-gradient(90deg,#ffd9a8 0%,#ff8a3d 45%,#ff6b8a 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
 
 /* ---------- Nav ---------- */
 .nav{
@@ -91,7 +72,7 @@ p{margin:0 0 1em;color:var(--ink-2)}
   border-bottom:1px solid var(--line);
 }
 .nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px;gap:16px}
-.brand{display:flex;align-items:center;gap:.65rem;font-weight:700;letter-spacing:-.01em}
+.brand{display:flex;align-items:center;gap:.65rem;font-weight:700;letter-spacing:-.01em;cursor:pointer}
 .brand-mark{
   width:34px;height:34px;border-radius:10px;
   background:linear-gradient(135deg,#ff8a3d,#ff6b8a);
@@ -100,46 +81,104 @@ p{margin:0 0 1em;color:var(--ink-2)}
 }
 .brand-name{font-size:1.05rem}
 .brand-name b{font-weight:800}
-.nav-links{display:none;gap:28px}
-.nav-links a{color:var(--ink-2);font-size:.95rem;font-weight:500;transition:color .2s}
-.nav-links a:hover{color:var(--ink)}
+.tabs{display:flex;gap:4px;background:rgba(255,255,255,.04);padding:4px;border-radius:12px;border:1px solid var(--line)}
+.tab{
+  background:transparent;border:0;color:var(--ink-3);
+  padding:.55rem .85rem;border-radius:9px;font-size:.88rem;font-weight:600;
+  cursor:pointer;transition:color .2s, background .2s;
+  display:inline-flex;align-items:center;gap:.4rem;
+}
+.tab:hover{color:var(--ink-2)}
+.tab.active{background:rgba(255,138,61,.18);color:var(--ink);box-shadow:inset 0 0 0 1px rgba(255,138,61,.3)}
+.tab .ic{font-size:1rem;line-height:1}
 .nav-cta{display:flex;align-items:center;gap:10px}
-@media(min-width:880px){.nav-links{display:flex}}
+.streak-pill{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:rgba(255,209,102,.12);border:1px solid rgba(255,209,102,.3);
+  color:var(--gold);padding:.45rem .75rem;border-radius:999px;font-size:.82rem;font-weight:600;
+}
+.streak-pill.hidden{display:none}
+@media(max-width:880px){
+  .tabs{display:none}
+}
+
+/* Mobile bottom nav */
+.bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:60;
+  background:rgba(15,20,36,.92);
+  backdrop-filter:saturate(160%) blur(14px);
+  -webkit-backdrop-filter:saturate(160%) blur(14px);
+  border-top:1px solid var(--line);
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+  justify-content:space-around;
+}
+.bottom-nav .tab{
+  flex-direction:column;gap:2px;padding:.55rem .4rem;font-size:.7rem;
+}
+.bottom-nav .tab.active{background:transparent;color:var(--accent);box-shadow:none}
+.bottom-nav .tab.active .ic{transform:scale(1.15)}
+@media(max-width:880px){
+  .bottom-nav{display:flex}
+  body{padding-bottom:80px}
+}
 
 /* ---------- Buttons ---------- */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:.55rem;
   padding:.85em 1.3em;border-radius:12px;font-weight:600;font-size:.95rem;
   border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s,border-color .2s;
-  white-space:nowrap;
+  white-space:nowrap;font-family:inherit;
 }
 .btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-primary{
   background:linear-gradient(180deg,#ffa259,#ff7a2a);
   color:#1a0e04;
   box-shadow:0 10px 30px rgba(255,122,42,.35), inset 0 1px 0 rgba(255,255,255,.35);
 }
 .btn-primary:hover{box-shadow:0 16px 40px rgba(255,122,42,.5), inset 0 1px 0 rgba(255,255,255,.35)}
-.btn-ghost{
-  background:transparent;color:var(--ink);border-color:var(--line-2);
-}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-2)}
 .btn-ghost:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.28)}
-.btn-link{color:var(--ink-2);font-weight:500}
+.btn-link{color:var(--ink-2);font-weight:500;background:transparent;border:0;padding:.4rem .6rem}
 .btn-link:hover{color:var(--ink)}
 .btn .arrow{transition:transform .2s}
 .btn:hover .arrow{transform:translateX(3px)}
+.btn-sm{padding:.55em .9em;font-size:.85rem}
+.btn-lg{padding:1em 1.6em;font-size:1.05rem}
 
-/* ---------- Hero ---------- */
-.hero{padding:clamp(70px,10vw,140px) 0 clamp(40px,6vw,80px);position:relative}
+/* ---------- Layout helpers ---------- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
+.view{padding:clamp(40px,6vw,80px) 0}
+.view-head{max-width:760px;margin:0 auto 40px;text-align:center}
+.view-head h1{margin:.4em 0 .6em;font-size:clamp(2rem,4.4vw,3.4rem)}
+.view-head .lead{margin:0 auto;color:var(--ink-2);font-size:1.05rem}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:.5em;
+  font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent-2);font-weight:600;
+  padding:.45em .9em;border:1px solid rgba(255,184,107,.25);border-radius:999px;
+  background:rgba(255,138,61,.08);
+}
+.lead{font-size:clamp(1.05rem,1.4vw,1.2rem);color:var(--ink-2);max-width:62ch}
+.muted{color:var(--ink-3)}
+.hidden{display:none !important}
+
+/* ---------- HOME / HERO ---------- */
+.hero{padding:clamp(60px,8vw,110px) 0 clamp(30px,5vw,60px)}
 .hero-grid{display:grid;grid-template-columns:1fr;gap:48px;align-items:center}
 @media(min-width:960px){.hero-grid{grid-template-columns:1.05fr .95fr;gap:64px}}
-.hero-copy h1{margin:.5em 0 .6em}
-.hero-copy .lead{margin-bottom:2rem}
+.hero-copy h1{margin:.5em 0 .6em;font-size:clamp(2.4rem,5.6vw,4.6rem);line-height:1.05}
+.gradient-text{
+  background:linear-gradient(90deg,#ffd9a8 0%,#ff8a3d 45%,#ff6b8a 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:1.6rem}
 .hero-meta{display:flex;flex-wrap:wrap;gap:18px;color:var(--ink-3);font-size:.9rem;align-items:center}
 .hero-meta .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(92,214,164,.18)}
 
-/* Hero visual: phone mockup */
+/* hero phone mockup */
 .hero-visual{position:relative;min-height:480px}
 .phone{
   position:relative;width:min(340px,80vw);margin:0 auto;
@@ -163,9 +202,9 @@ p{margin:0 0 1em;color:var(--ink-2)}
 .phone-status{display:flex;justify-content:space-between;padding:14px 22px 4px;font-size:11px;color:#5b3a1b;font-weight:600}
 .phone-status .icons{display:flex;gap:5px;align-items:center}
 .phone-status .icons span{width:14px;height:9px;background:#5b3a1b;border-radius:2px;display:inline-block}
-.phone-card{flex:1;padding:8px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.phone-card{flex:1;padding:8px 16px 16px;display:flex;flex-direction:column;gap:10px;min-height:0}
 .book-art{
-  height:34%;border-radius:16px;
+  height:34%;border-radius:16px;min-height:120px;
   background:
     radial-gradient(circle at 20% 20%,rgba(255,255,255,.4),transparent 50%),
     linear-gradient(135deg,#ff8a3d,#ff6b8a);
@@ -208,16 +247,13 @@ p{margin:0 0 1em;color:var(--ink-2)}
 .reading-bar .score{font-family:var(--font-display);font-weight:700;color:#1e6b53;font-size:1.1rem}
 .reading-bar .score small{font-size:.55rem;color:#5b3a1b;display:block;font-family:var(--font-sans);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 
-/* floating chips */
 .chip{
   position:absolute;background:var(--surface);border:1px solid var(--line-2);
   padding:10px 14px;border-radius:14px;display:flex;align-items:center;gap:10px;
   font-size:.85rem;color:var(--ink);box-shadow:var(--shadow-1);
   backdrop-filter:blur(6px);
 }
-.chip .ico{
-  width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:1rem;
-}
+.chip .ico{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:1rem}
 .chip.streak .ico{background:linear-gradient(135deg,#ffd166,#ff8a3d)}
 .chip.score .ico{background:linear-gradient(135deg,#5cd6a4,#39d3b6)}
 .chip.celebrate{animation:pop 4s ease-in-out infinite}
@@ -233,245 +269,255 @@ p{margin:0 0 1em;color:var(--ink-2)}
   .chip-3{display:none}
 }
 
-/* ---------- Logo strip ---------- */
-.logos{padding:0 0 30px}
-.logos-row{
-  display:grid;grid-template-columns:repeat(2,1fr);gap:24px 30px;
-  align-items:center;justify-items:center;opacity:.7;
-}
-.logos-row .lbl{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);text-align:center}
-@media(min-width:760px){.logos-row{grid-template-columns:repeat(5,1fr)}}
-.logo{
-  display:flex;align-items:center;gap:8px;color:var(--ink-2);font-weight:600;letter-spacing:.02em;
-  font-size:.95rem;
-}
-.logo .sq{
-  width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--accent),var(--rose));opacity:.85;
-}
-
-/* ---------- Section header ---------- */
-.section-head{text-align:center;max-width:760px;margin:0 auto 56px}
-.section-head h2{margin-top:.7em}
-.section-head .lead{margin:0 auto}
-
-/* ---------- Problem ---------- */
-.problem{background:linear-gradient(180deg,transparent,rgba(255,107,138,.04) 40%,transparent)}
-.problem-grid{display:grid;grid-template-columns:1fr;gap:32px}
-@media(min-width:880px){.problem-grid{grid-template-columns:1.1fr .9fr;gap:60px;align-items:center}}
-.stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:24px}
-@media(min-width:560px){.stat-row{grid-template-columns:repeat(4,1fr)}}
-.stat{
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-  padding:22px 18px;
-}
-.stat .num{font-family:var(--font-display);font-weight:700;font-size:clamp(1.7rem,3vw,2.2rem);background:linear-gradient(90deg,#ff8a3d,#ff6b8a);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1}
-.stat .lbl{font-size:.85rem;color:var(--ink-3);margin-top:6px}
-.problem-card{
-  background:linear-gradient(160deg,var(--surface),var(--bg-2));
-  border:1px solid var(--line);border-radius:var(--radius-lg);padding:28px;
-  box-shadow:var(--shadow-1);position:relative;overflow:hidden;
-}
-.problem-card::before{
-  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
-  background:linear-gradient(135deg,rgba(255,138,61,.45),rgba(255,107,138,.25) 40%,transparent 70%);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
-}
-.problem-card h3{font-family:var(--font-sans);font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.problem-card ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
-.problem-card li{font-size:.95rem;color:var(--ink-2);display:flex;align-items:flex-start;gap:10px}
-.problem-card li .x{flex-shrink:0;width:20px;height:20px;border-radius:6px;background:rgba(255,107,138,.18);color:#ff6b8a;display:grid;place-items:center;font-size:.75rem;font-weight:700;margin-top:1px}
-.problem-card li .check{flex-shrink:0;width:20px;height:20px;border-radius:6px;background:rgba(57,211,182,.18);color:var(--teal);display:grid;place-items:center;font-size:.75rem;font-weight:700;margin-top:1px}
-
-/* ---------- How it works ---------- */
-.steps{display:grid;grid-template-columns:1fr;gap:18px}
-@media(min-width:760px){.steps{grid-template-columns:repeat(3,1fr);gap:24px}}
-.step{
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-  padding:26px 24px;position:relative;transition:transform .2s,border-color .2s;
-}
-.step:hover{transform:translateY(-3px);border-color:rgba(255,138,61,.3)}
-.step .n{
-  position:absolute;top:-14px;left:24px;width:34px;height:34px;border-radius:10px;
-  background:linear-gradient(135deg,#ff8a3d,#ff6b8a);color:#1a0e04;font-family:var(--font-display);font-weight:700;
-  display:grid;place-items:center;box-shadow:0 8px 20px rgba(255,107,138,.3);
-}
-.step h3{margin:14px 0 8px;font-family:var(--font-sans);font-size:1.05rem;font-weight:600}
-.step p{font-size:.93rem;margin:0}
-
-/* ---------- Features ---------- */
+/* feature cards */
 .features{display:grid;grid-template-columns:1fr;gap:18px}
 @media(min-width:760px){.features{grid-template-columns:repeat(2,1fr);gap:24px}}
 @media(min-width:1080px){.features{grid-template-columns:repeat(3,1fr)}}
-.feature{
-  background:linear-gradient(170deg,var(--surface),var(--bg-2));
-  border:1px solid var(--line);border-radius:var(--radius);
-  padding:28px 24px;transition:transform .2s,border-color .2s,box-shadow .2s;
-  display:flex;flex-direction:column;
+.feat{
+  background:linear-gradient(160deg,var(--surface),var(--bg-2));
+  border:1px solid var(--line);border-radius:var(--radius);padding:24px;
+  transition:transform .25s var(--ease),border-color .25s;
 }
-.feature:hover{transform:translateY(-3px);border-color:rgba(255,138,61,.3);box-shadow:var(--shadow-1)}
-.feature .icon{
-  width:48px;height:48px;border-radius:14px;display:grid;place-items:center;
-  background:linear-gradient(135deg,rgba(255,138,61,.18),rgba(255,107,138,.18));
-  color:var(--accent-2);font-size:1.4rem;margin-bottom:18px;border:1px solid rgba(255,138,61,.2);
+.feat:hover{transform:translateY(-2px);border-color:rgba(255,138,61,.25)}
+.feat .ic{
+  width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+  background:rgba(255,138,61,.12);color:var(--accent);font-size:1.4rem;margin-bottom:14px;
 }
-.feature h3{font-family:var(--font-sans);font-size:1.08rem;font-weight:600;margin-bottom:8px;color:var(--ink)}
-.feature p{font-size:.92rem;margin:0 0 14px;flex:1}
-.feature .tag{
-  align-self:flex-start;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--teal);font-weight:700;
-}
+.feat h3{font-family:var(--font-sans);font-size:1.05rem;font-weight:600;margin-bottom:.5em}
+.feat p{color:var(--ink-2);font-size:.95rem;margin:0}
 
-/* ---------- Reading flow ---------- */
-.flow{background:linear-gradient(180deg,transparent,rgba(57,211,182,.05) 30%,transparent)}
-.flow-card{
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);
-  padding:clamp(24px,4vw,40px);
-  display:grid;grid-template-columns:1fr;gap:28px;
-  box-shadow:var(--shadow-1);
+.testi{
+  display:grid;grid-template-columns:1fr;gap:16px;margin-top:32px;
 }
-@media(min-width:880px){.flow-card{grid-template-columns:1fr 1fr;gap:48px;align-items:center}}
-.flow-list{list-style:none;padding:0;margin:18px 0 0;display:flex;flex-direction:column;gap:12px}
-.flow-list li{display:flex;gap:12px;align-items:flex-start}
-.flow-list .ord{
-  flex-shrink:0;width:28px;height:28px;border-radius:8px;background:rgba(255,138,61,.15);
-  color:var(--accent-2);display:grid;place-items:center;font-weight:700;font-size:.85rem;
-  border:1px solid rgba(255,138,61,.25);
-}
-.flow-list b{color:var(--ink);font-weight:600}
-.flow-list span{color:var(--ink-2);font-size:.92rem}
-.mock-screen{
-  background:linear-gradient(180deg,#fff7ec,#ffe7d1);
-  border-radius:22px;padding:20px;color:#3b1d05;
-  border:1px solid rgba(0,0,0,.05);
-  font-family:var(--font-sans);
-  box-shadow:0 20px 60px rgba(0,0,0,.3);
-}
-.mock-screen .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.mock-screen .header b{font-family:var(--font-display);font-weight:700;font-size:1.05rem}
-.mock-screen .header .pill{background:rgba(255,138,61,.2);color:#b34400;padding:3px 8px;border-radius:999px;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.mock-line{background:#fff;border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:.92rem;border:1px solid rgba(0,0,0,.05);position:relative}
-.mock-line.active{background:#fff7e6;border-color:#ffd9a8;box-shadow:0 0 0 3px rgba(255,138,61,.15)}
-.mock-line.active::before{content:"";position:absolute;left:-2px;top:6px;bottom:6px;width:3px;background:#ff8a3d;border-radius:3px}
-.mock-line .word{cursor:pointer;padding:1px 2px;border-radius:4px}
-.mock-line .word.good{background:rgba(92,214,164,.35);color:#0a4a30}
-.mock-line .word.miss{background:rgba(255,107,138,.35);color:#7a0a2a;text-decoration:line wavy #ff6b8a}
-.mock-line .word.cur{background:#ff8a3d;color:#fff;padding:1px 5px}
-.mock-foot{margin-top:14px;display:flex;align-items:center;gap:10px;justify-content:space-between}
-.wpm{font-family:var(--font-display);font-weight:700;font-size:1.1rem;color:#1e6b53}
-.wpm small{display:block;font-size:.65rem;color:#7a4d20;font-family:var(--font-sans);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-.mic-btn{
-  width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#ff8a3d,#ff6b8a);
-  color:#fff;display:grid;place-items:center;border:none;box-shadow:0 8px 20px rgba(255,107,138,.4);
-  animation:pulse 2.2s ease-in-out infinite;
-}
-@keyframes pulse{0%,100%{box-shadow:0 8px 20px rgba(255,107,138,.4)}50%{box-shadow:0 8px 30px rgba(255,107,138,.7), 0 0 0 10px rgba(255,107,138,.18)}}
-
-/* ---------- Pricing ---------- */
-.pricing-grid{display:grid;grid-template-columns:1fr;gap:20px;align-items:stretch}
-@media(min-width:880px){.pricing-grid{grid-template-columns:repeat(3,1fr);gap:24px}}
-.tier{
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);
-  padding:32px 28px;display:flex;flex-direction:column;position:relative;
-}
-.tier.featured{
-  background:linear-gradient(180deg,rgba(255,138,61,.08),var(--surface));
-  border-color:rgba(255,138,61,.35);
-  box-shadow:0 24px 60px rgba(255,138,61,.15);
-  transform:translateY(-6px);
-}
-.tier .ribbon{
-  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
-  background:linear-gradient(90deg,#ff8a3d,#ff6b8a);color:#1a0e04;
-  font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;
-  padding:5px 14px;border-radius:999px;box-shadow:0 8px 20px rgba(255,107,138,.35);
-}
-.tier h3{font-family:var(--font-sans);font-size:1.05rem;font-weight:600;color:var(--ink);margin-bottom:6px}
-.tier .price{font-family:var(--font-display);font-weight:700;font-size:2.4rem;letter-spacing:-.03em;line-height:1;margin:14px 0 4px}
-.tier .price small{font-size:.85rem;color:var(--ink-3);font-family:var(--font-sans);font-weight:500}
-.tier .sub{color:var(--ink-3);font-size:.88rem;margin-bottom:18px}
-.tier ul{list-style:none;padding:0;margin:0 0 22px;display:flex;flex-direction:column;gap:10px;flex:1}
-.tier li{font-size:.9rem;color:var(--ink-2);display:flex;gap:10px;align-items:flex-start}
-.tier li::before{
-  content:"";flex-shrink:0;width:18px;height:18px;border-radius:5px;background:rgba(57,211,182,.18);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2339d3b6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8.5l3 3 7-7'/%3E%3C/svg%3E");
-  background-position:center;background-repeat:no-repeat;margin-top:2px;
-}
-.tier .btn{width:100%}
-
-/* ---------- Testimonials ---------- */
-.testimonials{display:grid;grid-template-columns:1fr;gap:20px}
-@media(min-width:760px){.testimonials{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:760px){.testi{grid-template-columns:repeat(3,1fr)}}
 .quote{
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px;
-  display:flex;flex-direction:column;gap:14px;
-}
-.quote p{font-family:var(--font-display);font-size:1.05rem;color:var(--ink);margin:0;line-height:1.45}
-.quote .who{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--ink-3)}
-.quote .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#ffd166,#ff8a3d);display:grid;place-items:center;font-weight:700;color:#3b1d05;font-size:.85rem}
-.quote .who b{color:var(--ink);font-weight:600;display:block}
-.quote .who small{font-size:.78rem}
-
-/* ---------- FAQ ---------- */
-.faq-list{display:flex;flex-direction:column;gap:12px;max-width:820px;margin:0 auto}
-details.faq{
   background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-  padding:18px 22px;transition:border-color .2s;
+  padding:22px;font-size:.95rem;color:var(--ink-2);
 }
-details.faq[open]{border-color:rgba(255,138,61,.3);background:linear-gradient(180deg,rgba(255,138,61,.04),var(--surface))}
-details.faq summary{
-  cursor:pointer;list-style:none;font-weight:600;color:var(--ink);font-size:1rem;
-  display:flex;justify-content:space-between;align-items:center;gap:16px;
-}
-details.faq summary::-webkit-details-marker{display:none}
-details.faq summary::after{
-  content:"";width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.06);
-  flex-shrink:0;position:relative;transition:transform .2s,background .2s;
-}
-details.faq summary::after{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23c7c9d6' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
-  background-position:center;background-repeat:no-repeat;
-}
-details.faq[open] summary::after{transform:rotate(180deg)}
-details.faq p{margin:14px 0 0;color:var(--ink-2);font-size:.95rem}
+.quote .who{display:flex;align-items:center;gap:10px;margin-top:14px;color:var(--ink-3);font-size:.85rem}
+.quote .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#ffd166,#ff8a3d);display:grid;place-items:center;color:#3b1d05;font-weight:700}
 
-/* ---------- Final CTA ---------- */
-.cta-band{
-  background:radial-gradient(800px 400px at 50% 0%,rgba(255,138,61,.18),transparent 60%),var(--bg-2);
-  border:1px solid rgba(255,138,61,.25);border-radius:var(--radius-lg);
-  padding:clamp(40px,6vw,72px) clamp(24px,5vw,48px);
-  text-align:center;position:relative;overflow:hidden;
+/* ---------- LIBRARY ---------- */
+.library-filters{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:32px;
 }
-.cta-band::before{
-  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
-  background:linear-gradient(135deg,rgba(255,138,61,.6),transparent 40%,rgba(255,107,138,.5));
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+.filter-chip{
+  background:var(--surface);border:1px solid var(--line);color:var(--ink-2);
+  padding:.55rem 1rem;border-radius:999px;font-size:.88rem;font-weight:600;
+  cursor:pointer;transition:all .2s;font-family:inherit;
 }
-.cta-band h2{margin-bottom:.4em}
-.cta-band .lead{margin:0 auto 28px}
-.cta-band .small{font-size:.85rem;color:var(--ink-3);margin-top:14px}
+.filter-chip:hover{border-color:rgba(255,138,61,.3);color:var(--ink)}
+.filter-chip.active{background:rgba(255,138,61,.18);border-color:rgba(255,138,61,.4);color:var(--ink)}
 
-/* ---------- Footer ---------- */
+.book-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;
+}
+.book-card{
+  background:linear-gradient(160deg,var(--surface),var(--bg-2));
+  border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  transition:transform .25s var(--ease),border-color .25s,box-shadow .25s;
+  cursor:pointer;display:flex;flex-direction:column;
+  font-family:inherit;color:inherit;text-align:left;
+}
+.book-card:hover{transform:translateY(-3px);border-color:rgba(255,138,61,.3);box-shadow:var(--shadow-1)}
+.book-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.book-cover{
+  aspect-ratio:4/3;position:relative;overflow:hidden;
+  display:flex;align-items:flex-end;padding:18px;color:#fff;
+}
+.book-cover::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.5));
+  pointer-events:none;
+}
+.book-cover .lvl-badge{
+  position:relative;z-index:1;
+  background:rgba(255,255,255,.95);color:#1a0e04;font-weight:700;font-size:.7rem;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:.35rem .65rem;border-radius:6px;
+  align-self:flex-start;position:absolute;top:14px;left:14px;
+}
+.book-cover .title-on-cover{
+  position:relative;z-index:1;font-family:var(--font-display);font-weight:700;font-size:1.3rem;
+  line-height:1.15;
+}
+.book-info{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
+.book-info h3{font-family:var(--font-display);font-weight:700;font-size:1.15rem;color:var(--ink);margin:0;line-height:1.2}
+.book-info .desc{color:var(--ink-3);font-size:.85rem;margin:0}
+.book-meta-row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:10px;font-size:.78rem;color:var(--ink-3)}
+.book-meta-row .pill-sm{background:rgba(255,138,61,.15);color:var(--accent-2);padding:.2rem .55rem;border-radius:6px;font-weight:600;font-size:.72rem;letter-spacing:.04em}
+.progress-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:8px}
+.progress-bar > div{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .4s var(--ease)}
+
+/* ---------- PRACTICE ---------- */
+.practice-layout{
+  display:grid;grid-template-columns:1fr;gap:24px;max-width:920px;margin:0 auto;
+}
+.practice-header{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 18px;
+}
+.practice-header .meta{display:flex;gap:18px;font-size:.85rem;color:var(--ink-2)}
+.practice-header .meta b{color:var(--ink);font-family:var(--font-display);font-weight:700;font-size:1.1rem}
+.reader{
+  background:linear-gradient(160deg,#fff7ec,#ffe7d1);
+  border-radius:var(--radius-lg);padding:clamp(28px,5vw,48px);
+  min-height:280px;position:relative;color:#2a1a08;
+  box-shadow:var(--shadow-1);
+  font-family:'Fraunces',Georgia,serif;
+}
+.reader h2{font-family:var(--font-display);font-weight:700;color:#3b1d05;font-size:clamp(1.4rem,2.4vw,1.9rem);margin:0 0 6px}
+.reader .sub{color:#7a4d20;font-size:.9rem;margin-bottom:24px}
+.story-text{
+  font-size:clamp(1.15rem,1.8vw,1.45rem);
+  line-height:1.85;color:#2a1a08;
+  letter-spacing:.01em;
+}
+.story-text .w{
+  display:inline;padding:1px 3px;border-radius:4px;
+  transition:background .15s,color .15s, transform .2s;
+  cursor:pointer;
+}
+.story-text .w:hover{background:rgba(255,138,61,.15)}
+.story-text .w.active{
+  background:linear-gradient(180deg,#ffd166,#ff8a3d);
+  color:#3b1d05;
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(255,138,61,.4);
+}
+.story-text .w.spoken{color:#7a4d20}
+.story-text .punct{color:#7a4d20}
+.reader .tts-status{
+  position:absolute;top:18px;right:18px;
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.7);backdrop-filter:blur(8px);
+  padding:.4rem .75rem;border-radius:999px;font-size:.78rem;color:#5b3a1b;font-weight:600;
+}
+.tts-status .pulse{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.tts-status.speaking .pulse{background:var(--accent);animation:pulse 1.4s infinite}
+.tts-status.paused .pulse{background:var(--ink-3)}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
+
+.controls{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 18px;
+}
+.controls .left,.controls .right{display:flex;align-items:center;gap:8px}
+.speed-control{
+  display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);
+  padding:.35rem .65rem;border-radius:10px;border:1px solid var(--line);
+}
+.speed-control label{font-size:.78rem;color:var(--ink-3)}
+.speed-control select{
+  background:transparent;border:0;color:var(--ink);font-family:inherit;font-size:.88rem;font-weight:600;
+  cursor:pointer;outline:none;
+}
+.speed-control select option{background:var(--bg-2);color:var(--ink)}
+
+.finish-card{
+  background:linear-gradient(135deg,rgba(255,138,61,.12),rgba(57,211,182,.12));
+  border:1px solid rgba(255,138,61,.3);border-radius:var(--radius-lg);
+  padding:32px;text-align:center;
+}
+.finish-card .big-emoji{font-size:3rem;margin-bottom:12px}
+.finish-card h3{font-family:var(--font-display);font-size:1.6rem;margin-bottom:.4em;color:var(--ink)}
+.finish-card .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0}
+.finish-card .stat{
+  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:14px;
+}
+.finish-card .stat .num{font-family:var(--font-display);font-weight:700;font-size:1.6rem;color:var(--accent)}
+.finish-card .stat .lbl{font-size:.78rem;color:var(--ink-3);margin-top:4px}
+.finish-card .xp-earned{display:inline-flex;align-items:center;gap:6px;background:rgba(255,209,102,.18);color:var(--gold);padding:.5rem 1rem;border-radius:999px;font-weight:700;margin-bottom:8px}
+
+/* ---------- PROGRESS / DASHBOARD ---------- */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:32px;
+}
+@media(min-width:760px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-card{
+  background:linear-gradient(160deg,var(--surface),var(--bg-2));
+  border:1px solid var(--line);border-radius:var(--radius);padding:20px;
+}
+.stat-card .lbl{color:var(--ink-3);font-size:.82rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.stat-card .num{font-family:var(--font-display);font-weight:700;font-size:2rem;line-height:1.1;margin-top:6px;color:var(--ink)}
+.stat-card .sub{color:var(--ink-3);font-size:.82rem;margin-top:4px}
+.stat-card.acc .num{color:var(--ok)}
+.stat-card.streak .num{color:var(--gold)}
+.stat-card.xp .num{color:var(--accent)}
+.stat-card.minutes .num{color:var(--teal)}
+
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--ink-3);
+  background:var(--surface);border:1px dashed var(--line-2);border-radius:var(--radius);
+}
+.empty-state .ic{font-size:3rem;margin-bottom:12px}
+
+.history-list{display:flex;flex-direction:column;gap:10px}
+.history-row{
+  display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 18px;
+}
+.history-row .ico{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,138,61,.15);color:var(--accent);
+  display:grid;place-items:center;font-size:1rem;font-weight:700;
+}
+.history-row .info b{color:var(--ink);font-weight:600;display:block}
+.history-row .info small{color:var(--ink-3);font-size:.82rem}
+.history-row .right{text-align:right;color:var(--ink-3);font-size:.85rem}
+.history-row .right b{color:var(--ok);font-family:var(--font-display);font-weight:700;font-size:1.1rem;display:block}
+
+.ach-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:24px}
+.ach{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;display:flex;gap:12px;align-items:flex-start;
+}
+.ach.locked{opacity:.45;filter:grayscale(.6)}
+.ach .ic{width:42px;height:42px;border-radius:10px;background:rgba(255,209,102,.15);color:var(--gold);display:grid;place-items:center;font-size:1.3rem;flex-shrink:0}
+.ach.locked .ic{background:rgba(255,255,255,.04);color:var(--ink-3)}
+.ach .info b{font-weight:600;color:var(--ink);display:block;font-size:.95rem}
+.ach .info small{color:var(--ink-3);font-size:.8rem}
+
+/* ---------- FOOTER ---------- */
 footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gradient(180deg,transparent,rgba(0,0,0,.3))}
-.foot{display:grid;grid-template-columns:1fr;gap:30px;margin-bottom:40px}
-@media(min-width:760px){.foot{grid-template-columns:1.4fr 1fr 1fr 1fr;gap:48px}}
-.foot h4{font-family:var(--font-sans);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin:0 0 14px}
-.foot ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
-.foot li a{color:var(--ink-2);font-size:.92rem;transition:color .2s}
-.foot li a:hover{color:var(--accent-2)}
-.foot .brand p{font-size:.9rem;color:var(--ink-3);max-width:38ch;margin-top:10px}
-.foot-bot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px;padding-top:24px;border-top:1px solid var(--line);font-size:.85rem;color:var(--ink-3)}
-.foot-bot .socials{display:flex;gap:12px}
-.foot-bot .socials a{
-  width:34px;height:34px;border-radius:10px;background:var(--surface);border:1px solid var(--line);
-  display:grid;place-items:center;color:var(--ink-2);transition:all .2s;
-}
-.foot-bot .socials a:hover{color:var(--ink);border-color:rgba(255,138,61,.4);background:rgba(255,138,61,.08)}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;color:var(--ink-3);font-size:.88rem}
+.foot .links{display:flex;gap:18px}
+.foot a:hover{color:var(--ink-2)}
 
-/* ---------- Misc ---------- */
-.divider{height:1px;background:linear-gradient(90deg,transparent,var(--line-2),transparent);margin:0}
-.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@media (prefers-reduced-motion: reduce){
-  *{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+/* ---------- TOAST ---------- */
+.toast-wrap{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:100;pointer-events:none}
+@media(min-width:880px){.toast-wrap{bottom:24px}}
+.toast{
+  background:var(--surface);border:1px solid var(--line-2);
+  padding:12px 18px;border-radius:12px;color:var(--ink);font-size:.9rem;font-weight:600;
+  box-shadow:var(--shadow-2);display:flex;align-items:center;gap:10px;
+  opacity:0;transform:translateY(20px);transition:opacity .25s,transform .25s var(--ease);
+  pointer-events:auto;max-width:90vw;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast .em{font-size:1.1rem}
+
+/* ---------- ACCESSIBILITY ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* ---------- RESPONSIVE TWEAKS ---------- */
+@media(max-width:560px){
+  .nav-inner{height:60px}
+  .nav-cta .btn-ghost{display:none}
+  .hero{padding:50px 0 30px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .finish-card .stats{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -480,366 +526,243 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
 <!-- ========== NAV ========== -->
 <header class="nav">
   <div class="wrap nav-inner">
-    <a class="brand" href="#top" aria-label="ReadAlong Kids home">
+    <a class="brand" data-tab="home" aria-label="ReadAlong Kids home">
       <span class="brand-mark">R</span>
       <span class="brand-name">ReadAlong <b>Kids</b></span>
     </a>
-    <nav class="nav-links" aria-label="Primary">
-      <a href="#how">How it works</a>
-      <a href="#features">Features</a>
-      <a href="#flow">Sample flow</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#faq">FAQ</a>
+    <nav class="tabs" aria-label="Main views" role="tablist">
+      <button class="tab" data-tab="home" role="tab"><span class="ic">🏠</span>Home</button>
+      <button class="tab" data-tab="library" role="tab"><span class="ic">📚</span>Library</button>
+      <button class="tab" data-tab="practice" role="tab"><span class="ic">🎧</span>Practice</button>
+      <button class="tab" data-tab="progress" role="tab"><span class="ic">📈</span>Progress</button>
     </nav>
     <div class="nav-cta">
-      <a class="btn btn-ghost" href="#pricing" style="display:none">Sign in</a>
-      <a class="btn btn-primary" href="#waitlist">
-        Join the waitlist
-        <span class="arrow" aria-hidden="true">→</span>
-      </a>
+      <span id="streak-pill" class="streak-pill hidden" title="Current streak">🔥 <span id="streak-num">0</span> day streak</span>
     </div>
   </div>
 </header>
 
-<main id="top">
+<!-- ========== VIEWS ========== -->
+<main id="app">
 
-<!-- ========== HERO ========== -->
-<section class="hero">
+<!-- HOME -->
+<section id="view-home" class="view">
   <div class="wrap">
-    <div class="hero-grid">
-      <div class="hero-copy">
-        <span class="eyebrow">For ages 5–10 · Parent-built</span>
-        <h1>
-          Turn 10 minutes of daily reading into
-          <span class="gradient-text">visible fluency gains</span>.
-        </h1>
-        <p class="lead">
-          ReadAlong Kids is the AI read-aloud companion that listens, scores pronunciation in real time,
-          and emails you a weekly progress report — so you finally know if your child is actually getting better.
-        </p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="#waitlist">
-            Get the early-bird price
-            <span class="arrow" aria-hidden="true">→</span>
-          </a>
-          <a class="btn btn-ghost" href="#how">See how it works</a>
-        </div>
-        <div class="hero-meta">
-          <span><span class="dot"></span> 100 founding-family spots open</span>
-          <span class="muted">·</span>
-          <span class="muted">iOS · Android · Web</span>
-        </div>
-      </div>
-
-      <div class="hero-visual" aria-hidden="true">
-        <div class="chip chip-1 celebrate">
-          <div class="ico">🎉</div>
-          <div>
-            <b style="display:block;font-size:.85rem">7-day streak!</b>
-            <span style="font-size:.75rem;color:var(--ink-3)">+50 XP earned</span>
+    <div class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">For ages 5–10 · Parent-built</span>
+          <h1>Turn daily reading into <span class="gradient-text">visible fluency gains</span>.</h1>
+          <p class="lead">
+            A 10-minute AI read-aloud companion. Your child reads along, words light up in real time, and you get a weekly progress report straight to your phone.
+          </p>
+          <div class="hero-cta">
+            <button class="btn btn-primary btn-lg" data-tab="library">
+              <span>Open Library</span>
+              <span class="arrow" aria-hidden="true">→</span>
+            </button>
+            <button class="btn btn-ghost btn-lg" data-tab="practice">
+              <span class="arrow" aria-hidden="true">▶</span>
+              <span>Try a sample</span>
+            </button>
+          </div>
+          <div class="hero-meta">
+            <span><span class="dot"></span> 100 founding-family spots open</span>
+            <span class="muted">·</span>
+            <span class="muted">iOS · Web · No install</span>
           </div>
         </div>
-        <div class="chip chip-3 score">
-          <div class="ico">🎯</div>
-          <div>
-            <b style="display:block;font-size:.85rem">Fluency: 92</b>
-            <span style="font-size:.75rem;color:var(--ink-3)">Up 14% this week</span>
-          </div>
-        </div>
-        <div class="chip chip-2 streak">
-          <div class="ico">🏆</div>
-          <div>
-            <b style="display:block;font-size:.85rem">New badge</b>
-            <span style="font-size:.75rem;color:var(--ink-3)">“Chapter Champ”</span>
-          </div>
-        </div>
-
-        <div class="phone">
-          <div class="phone-screen">
-            <div class="phone-status">
-              <span>9:41</span>
-              <div class="icons"><span></span><span></span></div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="chip chip-1 celebrate">
+            <div class="ico">🎉</div>
+            <div>
+              <div style="font-weight:700">Nice reading!</div>
+              <div style="color:var(--ink-3);font-size:.78rem">+15 XP earned</div>
             </div>
-            <div class="phone-card">
-              <div class="book-art" aria-hidden="true"></div>
-              <div>
-                <div class="book-title">The Brave Little Fox</div>
-                <div class="book-meta">Level J · 142 words · 6 min</div>
+          </div>
+          <div class="chip chip-3 score">
+            <div class="ico">🎯</div>
+            <div>
+              <div style="font-weight:700">98% accuracy</div>
+              <div style="color:var(--ink-3);font-size:.78rem">Today's session</div>
+            </div>
+          </div>
+          <div class="chip chip-2 streak">
+            <div class="ico">🏆</div>
+            <div>
+              <div style="font-weight:700">5-day streak</div>
+              <div style="color:var(--ink-3);font-size:.78rem">Keep going!</div>
+            </div>
+          </div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="phone-status">
+                <span>9:41</span>
+                <div class="icons"><span></span><span></span></div>
               </div>
-              <div class="story-line">
-                <span class="pill">AI</span>
-                <span>“Maya tiptoed through the forest…”</span>
-              </div>
-              <div class="story-line hi">
-                <span class="pill" style="background:linear-gradient(180deg,#ffd166,#ff8a3d);color:#3b1d05">NOW</span>
-                <span>“…her <u>whiskers</u> twitched with curiosity.”</span>
-              </div>
-              <div class="reading-bar">
-                <div class="avatar">M</div>
-                <div class="info">
-                  <b>Maya · Age 7</b>
-                  <small>Reading 92 WPM · 96% accuracy</small>
+              <div class="phone-card">
+                <div class="book-art" aria-hidden="true"></div>
+                <div>
+                  <div class="book-title">The Brave Little Fox</div>
+                  <div class="book-meta">Level J · 142 words · 6 min</div>
                 </div>
-                <div class="score">A+<small>Score</small></div>
+                <div class="story-line">
+                  <span class="pill">AI</span>
+                  <span>Reading along with Mia…</span>
+                </div>
+                <div class="story-line hi">
+                  <span class="pill" style="background:linear-gradient(180deg,#ffd166,#ff8a3d);color:#3b1d05">NOW</span>
+                  <span>"The fox ran through the <b>forest</b>."</span>
+                </div>
+                <div class="reading-bar">
+                  <div class="avatar">M</div>
+                  <div class="info">
+                    <b>Mia · Age 7</b>
+                    <small>3 / 5 sessions this week</small>
+                  </div>
+                  <div class="score">A+<small>Score</small></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- ========== LOGO STRIP ========== -->
-<section class="logos" aria-label="Trust signals">
-  <div class="wrap">
-    <div class="logos-row">
-      <div class="lbl">As seen in</div>
-      <div class="logo"><span class="sq"></span> ParentCo</div>
-      <div class="logo"><span class="sq" style="background:linear-gradient(135deg,#39d3b6,#5cd6a4)"></span> EdTech Weekly</div>
-      <div class="logo"><span class="sq" style="background:linear-gradient(135deg,#ff6b8a,#ffd166)"></span> ReadAloud Daily</div>
-      <div class="logo"><span class="sq" style="background:linear-gradient(135deg,#ffd166,#39d3b6)"></span> The Literacy Lab</div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ========== PROBLEM ========== -->
-<section class="problem" id="problem">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">The problem</span>
-      <h2>You know reading matters. But you can't be there for every page.</h2>
-      <p class="lead">
-        Between work, dinner, and bedtime, sitting down to read with your child 5 nights a week is a stretch.
-        And when you do read together, it's hard to tell if they're actually improving — or just turning pages.
-      </p>
-    </div>
-
-    <div class="problem-grid">
-      <div>
-        <div class="stat-row">
-          <div class="stat"><div class="num">10 min</div><div class="lbl">Daily practice that doubles fluency gains</div></div>
-          <div class="stat"><div class="num">68%</div><div class="lbl">Of parents skip read-aloud on busy nights</div></div>
-          <div class="stat"><div class="num">4 in 5</div><div class="lbl">Kids can't tell you what they just read</div></div>
-          <div class="stat"><div class="num">0</div><div class="lbl">Visible progress between report cards</div></div>
-        </div>
-      </div>
-
-      <div class="problem-card">
-        <h3>❌ Passive screen time</h3>
-        <ul>
-          <li><span class="x">✕</span> <span><b style="color:var(--ink)">YouTube &amp; audiobooks don't measure</b> — kids can hit play and walk away.</span></li>
-          <li><span class="x">✕</span> <span><b style="color:var(--ink)">Tutors cost $40+/session</b> and most families can't afford weekly.</span></li>
-          <li><span class="x">✕</span> <span><b style="color:var(--ink)">School report cards lag by months</b> — by then small gaps become big ones.</span></li>
-        </ul>
-        <div style="height:18px"></div>
-        <h3 style="color:var(--teal)">✅ ReadAlong Kids</h3>
-        <ul>
-          <li><span class="check">✓</span> <span>AI listens to <b style="color:var(--ink)">your child's voice</b> and scores each word.</span></li>
-          <li><span class="check">✓</span> <span>Books <b style="color:var(--ink)">leveled A–Z</b> so your child is challenged, not frustrated.</span></li>
-          <li><span class="check">✓</span> <span>A <b style="color:var(--ink)">weekly email</b> shows the WPM, accuracy, and where to focus.</span></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ========== HOW IT WORKS ========== -->
-<section id="how">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">How it works</span>
-      <h2>Three steps. Ten minutes. Real progress.</h2>
-      <p class="lead">
-        Open the app, pick a book, and read. The AI handles the rest — listening, scoring, motivating,
-        and reporting back to you.
-      </p>
-    </div>
-
-    <div class="steps">
-      <div class="step">
-        <div class="n">1</div>
-        <h3>Pick a level, pick a book</h3>
-        <p>Start with a quick 2-minute placement test, or jump to your child's school grade level.
-          The library auto-adapts as they grow.</p>
-      </div>
-      <div class="step">
-        <div class="n">2</div>
-        <h3>Read aloud — AI scores live</h3>
-        <p>Your child reads. Our model catches skipped words, mispronunciations, and pacing in real time,
-          highlighting trouble spots without interrupting flow.</p>
-      </div>
-      <div class="step">
-        <div class="n">3</div>
-        <h3>Get the weekly parent report</h3>
-        <p>Every Sunday morning, an email lands in your inbox with WPM trend, accuracy, and
-          2-3 concrete tips. No login. No dashboards. Just clarity.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ========== FEATURES ========== -->
-<section id="features" style="background:linear-gradient(180deg,transparent,rgba(255,138,61,.04) 50%,transparent)">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">What's in the MVP</span>
-      <h2>Built around the one thing that actually moves fluency.</h2>
-      <p class="lead">
-        We don't ship a giant content library on day one. We ship the loop that compounds —
-        the read-aloud, the score, the report, the next day's session.
-      </p>
+    <div style="text-align:center;margin:60px auto 40px;max-width:760px">
+      <span class="eyebrow">What you get</span>
+      <h2 style="margin-top:1em">Three things parents actually need</h2>
     </div>
 
     <div class="features">
-      <div class="feature">
-        <div class="icon" aria-hidden="true">🎙️</div>
-        <h3>Real-time AI pronunciation scoring</h3>
-        <p>Phoneme-level feedback that highlights missed words and rough pronunciations — without breaking the child's flow.</p>
-        <span class="tag">Core</span>
-      </div>
-      <div class="feature">
-        <div class="icon" aria-hidden="true">📚</div>
-        <h3>Leveled library (Fountas &amp; Pinnell A–Z)</h3>
-        <p>Curated books matched to your child's reading level — short enough for a 10-min session, rich enough to actually enjoy.</p>
-        <span class="tag">Core</span>
-      </div>
-      <div class="feature">
-        <div class="icon" aria-hidden="true">📧</div>
-        <h3>Weekly parent report by email</h3>
-        <p>WPM, accuracy, streak, and 2-3 specific tips. Plain English. No login required to read it.</p>
-        <span class="tag">Core</span>
-      </div>
-      <div class="feature">
-        <div class="icon" aria-hidden="true">🏅</div>
-        <h3>Gamification that respects kids</h3>
-        <p>Streaks, badges, avatar rewards. No manipulative dark patterns, no pay-to-win. Just little wins that build a habit.</p>
-        <span class="tag">Engagement</span>
-      </div>
-      <div class="feature">
-        <div class="icon" aria-hidden="true">🧠</div>
-        <h3>Comprehension quiz at story end</h3>
-        <p>3 quick questions that turn a passive read into an active one. Catches the “eyes-on-page, brain-elsewhere” problem.</p>
-        <span class="tag">Engagement</span>
-      </div>
-      <div class="feature">
-        <div class="icon" aria-hidden="true">👨‍👩‍👧</div>
-        <h3>Multi-child profiles (Family plan)</h3>
-        <p>Up to 3 kids on one subscription. Each child gets their own level, library, and report.</p>
-        <span class="tag">Family</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ========== SAMPLE FLOW ========== -->
-<section class="flow" id="flow">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">A day in the life</span>
-      <h2>What 10 minutes actually looks like.</h2>
-      <p class="lead">
-        Here's a real reading session — Maya is 7, on Level J, working through “The Brave Little Fox.”
-      </p>
+      <article class="feat">
+        <div class="ic">🎧</div>
+        <h3>Real-time word highlighting</h3>
+        <p>Children read along as the AI voice narrates. Each word lights up so they never lose their place — even on tricky pages.</p>
+      </article>
+      <article class="feat">
+        <div class="ic">📚</div>
+        <h3>Leveled library, 5 difficulty tiers</h3>
+        <p>From early-reader picture books to chapter-book fluency — short stories your child can actually finish in 5-10 minutes.</p>
+      </article>
+      <article class="feat">
+        <div class="ic">📈</div>
+        <h3>Honest progress, no vanity metrics</h3>
+        <p>Words-per-minute, accuracy, streak days, and the books that took the longest. All stored locally on your device — kid-safe by default.</p>
+      </article>
     </div>
 
-    <div class="flow-card">
-      <div>
-        <h3 style="font-family:var(--font-sans);font-size:1.15rem;margin-bottom:6px">Tonight's session</h3>
-        <p style="margin-bottom:6px"><b style="color:var(--ink)">Book:</b> The Brave Little Fox · Level J · 142 words</p>
-        <ol class="flow-list">
-          <li><span class="ord">1</span><div><b>Listen to Maya read</b><br><span>AI scores word-by-word, highlights skips, celebrates accuracy.</span></div></li>
-          <li><span class="ord">2</span><div><b>Help on tough words</b><br><span>Tap a highlighted word → kid-friendly definition + audio re-read.</span></div></li>
-          <li><span class="ord">3</span><div><b>3-question comprehension quiz</b><br><span>Multiple choice with a friendly narrator. No pressure to be perfect.</span></div></li>
-          <li><span class="ord">4</span><div><b>Streak check &amp; badge</b><br><span>Maya just hit 14 days straight. New “Chapter Champ” badge unlocked.</span></div></li>
-          <li><span class="ord">5</span><div><b>Sunday: parent report</b><br><span>You get an email: +4 WPM, 96% accuracy, one focus area for next week.</span></div></li>
-        </ol>
-      </div>
-
-      <div class="mock-screen" aria-hidden="true">
-        <div class="header">
-          <b>The Brave Little Fox</b>
-          <span class="pill">Level J</span>
-        </div>
-        <div class="mock-line">
-          <span class="word good">Maya</span>
-          <span class="word good">tiptoed</span>
-          <span class="word good">through</span>
-          <span class="word good">the</span>
-          <span class="word good">forest,</span>
-        </div>
-        <div class="mock-line">
-          <span class="word good">her</span>
-          <span class="word miss">whiskers</span>
-          <span class="word">twitched</span>
-          <span class="word good">with</span>
-          <span class="word good">curiosity.</span>
-        </div>
-        <div class="mock-line active">
-          <span class="word good">A</span>
-          <span class="word good">soft</span>
-          <span class="word cur">rustle</span>
-          <span class="word">echoed</span>
-          <span class="word good">nearby.</span>
-        </div>
-        <div class="mock-foot">
-          <div>
-            <div class="wpm">92<small>Words / min</small></div>
-          </div>
-          <button class="mic-btn" aria-label="Listen">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ========== TESTIMONIALS ========== -->
-<section>
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">What parents say</span>
-      <h2>From our private beta with 40 families.</h2>
-    </div>
-    <div class="testimonials">
+    <div class="testi">
       <div class="quote">
-        <p>“I finally know if she's actually getting better. The Sunday email is everything — short, specific, no jargon.”</p>
-        <div class="who">
-          <div class="av">A</div>
-          <div>
-            <b>Adriana P.</b>
-            <small>Mom of 6-yr-old · Bucharest</small>
-          </div>
-        </div>
+        "She went from avoiding books to asking for 'one more story' every night."
+        <div class="who"><div class="av">A</div>Andrei · dad of 6-y/o Mara</div>
       </div>
       <div class="quote">
-        <p>“My son asks to read now. He thinks it's a game. I think it's the best $9.99 I spend all month.”</p>
-        <div class="who">
-          <div class="av">M</div>
-          <div>
-            <b>Marcus T.</b>
-            <small>Dad of 8-yr-old · Austin</small>
-          </div>
-        </div>
+        "The weekly summary told me he was stuck on a few words. We practiced together for 10 minutes — huge jump."
+        <div class="who"><div class="av">E</div>Elena · mom of 8-y/o David</div>
       </div>
       <div class="quote">
-        <p>“Three weeks in, his WPM went from 48 to 71. His teacher noticed. I cried a little. Don't tell him.”</p>
-        <div class="who">
-          <div class="av">R</div>
-          <div>
-            <b>Rina K.</b>
-            <small>Mom of 9-yr-old · Toronto</small>
+        "Better than any tutor we've tried, and my kid actually wants to use it."
+        <div class="who"><div class="av">R</div>Roxana · mom of 7-y/o Ana</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIBRARY -->
+<section id="view-library" class="view hidden">
+  <div class="wrap">
+    <div class="view-head">
+      <span class="eyebrow">📚 Library</span>
+      <h1>Pick a story to read together</h1>
+      <p class="lead">Short, leveled stories your child can finish in 5–10 minutes. Click any book to start reading.</p>
+    </div>
+
+    <div class="library-filters" id="lib-filters" role="tablist" aria-label="Filter by level">
+      <button class="filter-chip active" data-level="all">All levels</button>
+      <button class="filter-chip" data-level="1">Level 1 · Beginner</button>
+      <button class="filter-chip" data-level="2">Level 2 · Early</button>
+      <button class="filter-chip" data-level="3">Level 3 · Growing</button>
+      <button class="filter-chip" data-level="4">Level 4 · Confident</button>
+      <button class="filter-chip" data-level="5">Level 5 · Fluent</button>
+    </div>
+
+    <div class="book-grid" id="book-grid" role="list">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- PRACTICE -->
+<section id="view-practice" class="view hidden">
+  <div class="wrap">
+    <div class="view-head">
+      <span class="eyebrow">🎧 Practice</span>
+      <h1 id="practice-title">Pick a story from the Library</h1>
+      <p class="lead">Press play. Read along. Words light up as the AI voice narrates.</p>
+    </div>
+
+    <div class="practice-layout" id="practice-wrap">
+      <div class="empty-state" id="practice-empty">
+        <div class="ic">📚</div>
+        <h3 style="margin:.4em 0">No book selected</h3>
+        <p>Open the Library and pick a story to start reading.</p>
+        <button class="btn btn-primary" data-tab="library" style="margin-top:14px">Go to Library →</button>
+      </div>
+
+      <div id="practice-content" class="hidden">
+        <div class="practice-header">
+          <div class="meta">
+            <div><b id="ph-level">—</b><br><span class="muted">Level</span></div>
+            <div><b id="ph-words">0</b><br><span class="muted">words</span></div>
+            <div><b id="ph-wpm">0</b><br><span class="muted">wpm target</span></div>
+          </div>
+          <button class="btn btn-link" id="change-book">← Change book</button>
+        </div>
+
+        <article class="reader" aria-live="polite">
+          <div class="tts-status paused" id="tts-status">
+            <span class="pulse"></span><span id="tts-status-text">Ready</span>
+          </div>
+          <h2 id="story-title">Story title</h2>
+          <div class="sub" id="story-sub">Level · words · min</div>
+          <div class="story-text" id="story-text"></div>
+        </article>
+
+        <div class="controls">
+          <div class="left">
+            <button class="btn btn-primary" id="btn-play">
+              <span id="play-icon">▶</span> <span id="play-label">Read aloud</span>
+            </button>
+            <button class="btn btn-ghost" id="btn-restart" title="Restart from beginning">↺ Restart</button>
+          </div>
+          <div class="right">
+            <div class="speed-control">
+              <label for="speed-sel">Speed</label>
+              <select id="speed-sel">
+                <option value="0.7">0.7× · slow</option>
+                <option value="0.85">0.85×</option>
+                <option value="1" selected>1× · normal</option>
+                <option value="1.15">1.15×</option>
+              </select>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="btn-finish" title="Mark session complete">✓ Done</button>
+          </div>
+        </div>
+
+        <div class="finish-card hidden" id="finish-card">
+          <div class="big-emoji">🎉</div>
+          <h3>Nice reading!</h3>
+          <div class="xp-earned">+<span id="xp-earned">0</span> XP earned</div>
+          <div class="stats">
+            <div class="stat"><div class="num" id="fin-time">0:00</div><div class="lbl">Time</div></div>
+            <div class="stat"><div class="num" id="fin-wpm">0</div><div class="lbl">Words / min</div></div>
+            <div class="stat"><div class="num" id="fin-acc">0%</div><div class="lbl">Coverage</div></div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button class="btn btn-primary" id="fin-again">Read again</button>
+            <button class="btn btn-ghost" data-tab="library">Pick another book</button>
+            <button class="btn btn-ghost" data-tab="progress">See progress</button>
           </div>
         </div>
       </div>
@@ -847,189 +770,719 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
   </div>
 </section>
 
-<div class="divider"></div>
-
-<!-- ========== PRICING ========== -->
-<section id="pricing" style="background:linear-gradient(180deg,transparent,rgba(57,211,182,.04) 50%,transparent)">
+<!-- PROGRESS -->
+<section id="view-progress" class="view hidden">
   <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Pricing</span>
-      <h2>Less than a tutor session. More useful than a workbook.</h2>
-      <p class="lead">
-        Founding-family price locked for life if you join the waitlist before launch.
-        Cancel anytime, no questions.
-      </p>
+    <div class="view-head">
+      <span class="eyebrow">📈 Progress</span>
+      <h1>Your reading journey</h1>
+      <p class="lead">All stats stay on this device. Export anytime.</p>
     </div>
 
-    <div class="pricing-grid">
-      <div class="tier">
-        <h3>Starter</h3>
-        <p class="sub">Perfect for one child getting started.</p>
-        <div class="price">$9.99<small> / month</small></div>
-        <ul>
-          <li>1 child profile</li>
-          <li>Real-time AI pronunciation scoring</li>
-          <li>Leveled library (A–Z)</li>
-          <li>Weekly parent email report</li>
-          <li>Streaks &amp; badges</li>
-        </ul>
-        <a class="btn btn-ghost" href="#waitlist">Start with Starter</a>
-      </div>
-
-      <div class="tier featured">
-        <span class="ribbon">Most popular</span>
-        <h3>Family</h3>
-        <p class="sub">For 1–3 kids on one subscription.</p>
-        <div class="price">$14.99<small> / month</small></div>
-        <ul>
-          <li><b style="color:var(--ink)">Everything in Starter</b></li>
-          <li>Up to 3 child profiles</li>
-          <li>Per-child progress reports</li>
-          <li>Comprehension quizzes</li>
-          <li>Avatar rewards &amp; custom themes</li>
-          <li>Priority email support</li>
-        </ul>
-        <a class="btn btn-primary" href="#waitlist">
-          Get Family — save 25%
-          <span class="arrow" aria-hidden="true">→</span>
-        </a>
-      </div>
-
-      <div class="tier">
-        <h3>School</h3>
-        <p class="sub">For classrooms &amp; learning pods.</p>
-        <div class="price">Custom<small> / seat</small></div>
-        <ul>
-          <li>Teacher dashboard</li>
-          <li>Bulk child profiles</li>
-          <li>School-aligned leveling</li>
-          <li>District-friendly reporting</li>
-          <li>SSO &amp; admin controls</li>
-        </ul>
-        <a class="btn btn-ghost" href="#waitlist">Talk to us</a>
-      </div>
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card streak"><div class="lbl">Streak</div><div class="num" id="s-streak">0</div><div class="sub">days in a row</div></div>
+      <div class="stat-card xp"><div class="lbl">Total XP</div><div class="num" id="s-xp">0</div><div class="sub" id="s-xp-sub">Level Reader 1</div></div>
+      <div class="stat-card acc"><div class="lbl">Sessions</div><div class="num" id="s-sessions">0</div><div class="sub">completed</div></div>
+      <div class="stat-card minutes"><div class="lbl">Reading time</div><div class="num" id="s-minutes">0</div><div class="sub">minutes</div></div>
     </div>
 
-    <p class="muted" style="text-align:center;margin-top:32px;font-size:.9rem">
-      14-day free trial. Cancel anytime in two clicks. Refund within 30 days, no questions.
-    </p>
-  </div>
-</section>
+    <h2 style="font-family:var(--font-display);font-size:1.4rem;margin:32px 0 14px">Recent sessions</h2>
+    <div class="history-list" id="history-list"></div>
 
-<div class="divider"></div>
+    <h2 style="font-family:var(--font-display);font-size:1.4rem;margin:40px 0 14px">Achievements</h2>
+    <div class="ach-list" id="ach-list"></div>
 
-<!-- ========== FAQ ========== -->
-<section id="faq">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">FAQ</span>
-      <h2>Honest answers to the questions parents actually ask.</h2>
-    </div>
-
-    <div class="faq-list">
-      <details class="faq" open>
-        <summary>Is my child's voice data safe?</summary>
-        <p>Audio is processed to score pronunciation and then deleted within 24 hours. We never sell voice data, never use it to train third-party models, and never share it with schools or advertisers. The weekly parent report is anonymized — we don't send raw audio to your email.</p>
-      </details>
-      <details class="faq">
-        <summary>What ages is this actually for?</summary>
-        <p>Designed for kids 5–10 who can already recognize most letters and sound out simple words. If your child is just learning the alphabet, ReadAlong is too early — we'd recommend a phonics app first and ReadAlong as a follow-up.</p>
-      </details>
-      <details class="faq">
-        <summary>How is this different from Khan Academy Kids or SpeechBlubs?</summary>
-        <p>Those are great passive content libraries — kids watch and tap. ReadAlong is the opposite: your child is the performer. The AI listens, scores, and reports back to <i>you</i>. The parent report is the product, not the app itself.</p>
-      </details>
-      <details class="faq">
-        <summary>Does it work on iPad / tablet / phone?</summary>
-        <p>Yes — iOS, Android, and a web app for laptops. Phone works best for solo reading; tablet or laptop is nicer for the comprehension quiz.</p>
-      </details>
-      <details class="faq">
-        <summary>What if my child stutters or has a speech difference?</summary>
-        <p>ReadAlong is built for reading fluency, not speech therapy. We partner with a small set of speech-language pathologists to make the scoring more forgiving, and we never score on cadence in a way that could shame a child. If you have specific concerns, email us — we'll personally configure your child's profile.</p>
-      </details>
-      <details class="faq">
-        <summary>What if my child hates it?</summary>
-        <p>Then it's not the right time. Cancel in two clicks, no questions, no email follow-ups. We'd rather you remember us as the app that respected your kid than the one that annoyed you.</p>
-      </details>
-      <details class="faq">
-        <summary>When does it launch?</summary>
-        <p>Closed beta with 100 founding families in Q4 2026. Join the waitlist to lock the early-bird price and skip the line.</p>
-      </details>
-    </div>
-  </div>
-</section>
-
-<!-- ========== FINAL CTA ========== -->
-<section id="waitlist">
-  <div class="wrap">
-    <div class="cta-band">
-      <span class="eyebrow" style="background:rgba(255,138,61,.15);border-color:rgba(255,184,107,.4)">Limited spots</span>
-      <h2 style="margin-top:16px">Lock the early-bird price.<br>Help your kid fall in love with reading.</h2>
-      <p class="lead">100 founding families get lifetime pricing, founder swag, and direct access to the team. No spam, ever.</p>
-      <a class="btn btn-primary" href="mailto:hello@readalongkids.app?subject=ReadAlong%20Kids%20waitlist" style="font-size:1.05rem;padding:1em 1.6em">
-        Join the waitlist
-        <span class="arrow" aria-hidden="true">→</span>
-      </a>
-      <p class="small">or email <a href="mailto:hello@readalongkids.app" style="color:var(--accent-2);text-decoration:underline">hello@readalongkids.app</a></p>
+    <div style="text-align:center;margin-top:40px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-ghost" id="btn-export">📥 Export progress (JSON)</button>
+      <button class="btn btn-ghost" id="btn-reset">🗑 Reset progress</button>
     </div>
   </div>
 </section>
 
 </main>
 
+<!-- ========== MOBILE BOTTOM NAV ========== -->
+<nav class="bottom-nav" aria-label="Mobile navigation">
+  <button class="tab active" data-tab="home" role="tab"><span class="ic">🏠</span>Home</button>
+  <button class="tab" data-tab="library" role="tab"><span class="ic">📚</span>Library</button>
+  <button class="tab" data-tab="practice" role="tab"><span class="ic">🎧</span>Practice</button>
+  <button class="tab" data-tab="progress" role="tab"><span class="ic">📈</span>Progress</button>
+</nav>
+
 <!-- ========== FOOTER ========== -->
 <footer>
-  <div class="wrap">
-    <div class="foot">
-      <div class="brand">
-        <div class="brand" style="gap:.65rem;margin-bottom:6px">
-          <span class="brand-mark">R</span>
-          <span class="brand-name">ReadAlong <b>Kids</b></span>
-        </div>
-        <p>The AI read-aloud companion that turns daily 10-minute practice into visible fluency gains — and tells you about it every Sunday.</p>
-      </div>
-      <div>
-        <h4>Product</h4>
-        <ul>
-          <li><a href="#how">How it works</a></li>
-          <li><a href="#features">Features</a></li>
-          <li><a href="#flow">Sample flow</a></li>
-          <li><a href="#pricing">Pricing</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Company</h4>
-        <ul>
-          <li><a href="#waitlist">Join waitlist</a></li>
-          <li><a href="mailto:hello@readalongkids.app">Contact</a></li>
-          <li><a href="#faq">FAQ</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Legal</h4>
-        <ul>
-          <li><a href="#">Privacy</a></li>
-          <li><a href="#">Terms</a></li>
-          <li><a href="#">Child safety</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="foot-bot">
-      <div>© 2026 ReadAlong Kids · Made with care for parents and the kids who love them.</div>
-      <div class="socials" aria-label="Social links">
-        <a href="#" aria-label="Twitter">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21l-6.52 7.45L22 22h-6.75l-4.43-5.8L5.6 22H2.84l6.97-7.96L2 2h6.91l4 5.27L18.244 2zm-2.36 18h1.86L7.18 4H5.2l10.68 16z"/></svg>
-        </a>
-        <a href="#" aria-label="LinkedIn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.22 8h4.56v15H.22V8zm7.4 0h4.37v2.05h.06c.61-1.15 2.1-2.36 4.32-2.36 4.62 0 5.48 3.04 5.48 7v8.31h-4.55v-7.36c0-1.76-.03-4.02-2.45-4.02-2.45 0-2.83 1.91-2.83 3.89V23H7.62V8z"/></svg>
-        </a>
-        <a href="#" aria-label="Instagram">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38a3.7 3.7 0 0 1-1.38.9c-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zm0 5.6a4.24 4.24 0 1 0 0 8.48 4.24 4.24 0 0 0 0-8.48zm5.18-.34a.99.99 0 1 0 0-1.98.99.99 0 0 0 0 1.98zM12 9.6a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8z"/></svg>
-        </a>
-      </div>
+  <div class="wrap foot">
+    <div>© 2026 ReadAlong Kids · Built for ages 5–10</div>
+    <div class="links">
+      <a href="#" data-tab="home">Home</a>
+      <a href="#" data-tab="library">Library</a>
+      <a href="#" data-tab="progress">Progress</a>
     </div>
   </div>
 </footer>
 
+<!-- ========== TOAST ========== -->
+<div class="toast-wrap"><div class="toast" id="toast" role="status" aria-live="polite"></div></div>
+
+<script>
+/* =====================================================
+   ReadAlong Kids — fully functional SPA
+   Single-file vanilla JS. No dependencies.
+   ===================================================== */
+'use strict';
+
+/* ---------- Stories (5 levels, real content) ---------- */
+const STORIES = [
+  {
+    id:'sun',
+    level:1, title:'The Sun and the Cat',
+    cover:'linear-gradient(135deg,#ffd166,#ff8a3d)',
+    desc:'A warm day, a sleepy cat. Easy words, big ideas.',
+    words:52, wpmTarget:60,
+    text:`The sun is high in the sky. A little cat sits by the door. She is warm. She is sleepy. "Meow," she says. "I will nap here in the sun." A bird sings. A bee hums. The cat closes her eyes. The sun smiles down. What a good day for a nap.`
+  },
+  {
+    id:'fox',
+    level:1, title:'The Brave Little Fox',
+    cover:'linear-gradient(135deg,#ff8a3d,#ff6b8a)',
+    desc:'A small fox, a big adventure. The story that started it all.',
+    words:46, wpmTarget:70,
+    text:`A little fox lives in the woods. He is small, but he is brave. Today he will go far. He walks by the brook. He jumps over rocks. He sees a deer. "Hello, friend!" he says. The deer nods back. The fox runs home before dark.`
+  },
+  {
+    id:'seed',
+    level:2, title:'A Tiny Seed',
+    cover:'linear-gradient(135deg,#5cd6a4,#39d3b6)',
+    desc:'From a seed to a sunflower — patience and wonder.',
+    words:54, wpmTarget:90,
+    text:`Mara found a tiny seed in the garden. She planted it in soft, dark soil. She gave it water every day. Soon a small green sprout came up. The sprout grew taller every week. By summer it was a tall sunflower with bright yellow petals. Mara smiled. One tiny seed had become something beautiful.`
+  },
+  {
+    id:'robot',
+    level:3, title:'The Robot Who Wanted Tea',
+    cover:'linear-gradient(135deg,#39d3b6,#5b8cff)',
+    desc:'A friendly robot learns the joy of small daily rituals.',
+    words:102, wpmTarget:110,
+    text:`Pip was a curious little robot who lived in a small blue house at the edge of town. Every afternoon at four o'clock, Pip watched the neighbors drink tea together. They laughed and talked while steam rose from their cups. Pip wanted to join them. But robots do not drink tea. So Pip learned to boil water, to set out cups, and to listen very carefully. Now every afternoon, Pip's house is the noisiest on the street. There is laughter, there is chatter, and there is always one cup of tea, still and warm, waiting for a robot who never drinks it.`
+  },
+  {
+    id:'stars',
+    level:4, title:'Letters to the Stars',
+    cover:'linear-gradient(135deg,#7d6bff,#ff6b8a)',
+    desc:'A girl writes to the night sky — and the sky writes back.',
+    words:125, wpmTarget:130,
+    text:`Every night before bed, Iris climbs onto the roof of her grandparents' house and writes a letter to the stars. She tells them about her day, about the dog she saw, about the strange taste of rain. She folds each letter very small, sets it on the brightest star she can find, and whispers, "Please write soon." She never expects a reply. But one morning she wakes to find a paper airplane on her windowsill. It is folded from a piece of sky-blue paper, and it smells faintly of cold air. Inside, in handwriting she does not recognize, are three words: "We are listening." From that evening on, she writes two letters each night. One for the stars, and one for whoever is listening back.`
+  }
+];
+
+/* ---------- State ---------- */
+const STORAGE_KEY = 'readalong-kids-v1';
+const defaultState = {
+  xp:0, sessions:[], currentBookId:null,
+  wordProgress:{}, // {bookId:{lastIdx:0}}
+};
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return {...defaultState};
+    return {...defaultState, ...JSON.parse(raw)};
+  }catch(e){ return {...defaultState}; }
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){ console.warn('Save failed', e); }
+}
+
+/* ---------- Router ---------- */
+const VIEWS = ['home','library','practice','progress'];
+function showView(name){
+  if(!VIEWS.includes(name)) name = 'home';
+  for(const v of VIEWS){
+    const el = document.getElementById('view-'+v);
+    if(el) el.classList.toggle('hidden', v!==name);
+  }
+  document.querySelectorAll('.tab[data-tab]').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tab===name);
+  });
+  // Highlight the active tab in BOTH top tabs and bottom tabs
+  document.querySelectorAll('.tab').forEach(b=>{
+    if(b.dataset && b.dataset.tab){
+      b.classList.toggle('active', b.dataset.tab===name);
+    }
+  });
+  if(name === 'practice') renderPractice();
+  if(name === 'library') renderLibrary();
+  if(name === 'progress') renderProgress();
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+document.addEventListener('click', (e)=>{
+  const t = e.target.closest('[data-tab]');
+  if(t){
+    e.preventDefault();
+    const tab = t.dataset.tab;
+    if(tab === 'practice'){
+      // No-op, renderPractice handles missing book
+    }
+    showView(tab);
+  }
+});
+
+/* ---------- Library ---------- */
+let currentLevelFilter = 'all';
+document.addEventListener('click',(e)=>{
+  const f = e.target.closest('.filter-chip');
+  if(f){
+    document.querySelectorAll('.filter-chip').forEach(c=>c.classList.toggle('active', c===f));
+    currentLevelFilter = f.dataset.level;
+    renderLibrary();
+  }
+});
+function renderLibrary(){
+  const grid = document.getElementById('book-grid');
+  if(!grid) return;
+  const books = STORIES.filter(s => currentLevelFilter==='all' || String(s.level)===currentLevelFilter);
+  grid.innerHTML = books.map(b => {
+    const wp = state.wordProgress[b.id] || {lastIdx:0};
+    const pct = Math.min(100, Math.round((wp.lastIdx / b.words) * 100));
+    return `
+      <button class="book-card" data-book="${b.id}" role="listitem" aria-label="${b.title}, level ${b.level}">
+        <div class="book-cover" style="background:${b.cover}">
+          <span class="lvl-badge">Level ${b.level}</span>
+          <span class="title-on-cover">${b.title}</span>
+        </div>
+        <div class="book-info">
+          <h3>${b.title}</h3>
+          <p class="desc">${b.desc}</p>
+          <div class="book-meta-row">
+            <span>${b.words} words · ~${Math.max(1,Math.round(b.words/b.wpmTarget))} min</span>
+            <span class="pill-sm">${pct>0 ? pct+'%' : 'New'}</span>
+          </div>
+          ${pct>0 ? `<div class="progress-bar"><div style="width:${pct}%"></div></div>` : ''}
+        </div>
+      </button>
+    `;
+  }).join('');
+  grid.querySelectorAll('.book-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      openBook(card.dataset.book);
+    });
+  });
+}
+
+/* ---------- Practice / TTS ---------- */
+let currentBook = null;
+let storyWords = []; // array of {text, idx}
+let activeWordIdx = -1;
+let ttsUtterance = null;
+let sessionTimerStart = 0;
+let sessionTimerInterval = null;
+let isSpeaking = false;
+let isPaused = false;
+
+function openBook(id){
+  const book = STORIES.find(s=>s.id===id);
+  if(!book) return;
+  state.currentBookId = id;
+  saveState();
+  showView('practice');
+}
+
+function renderPractice(){
+  const empty = document.getElementById('practice-empty');
+  const content = document.getElementById('practice-content');
+  const titleEl = document.getElementById('practice-title');
+  if(!state.currentBookId){
+    if(empty) empty.classList.remove('hidden');
+    if(content) content.classList.add('hidden');
+    if(titleEl) titleEl.textContent = 'Pick a story from the Library';
+    return;
+  }
+  const book = STORIES.find(s=>s.id===state.currentBookId);
+  if(!book){
+    state.currentBookId = null;
+    saveState();
+    renderPractice();
+    return;
+  }
+  currentBook = book;
+  if(empty) empty.classList.add('hidden');
+  if(content) content.classList.remove('hidden');
+  if(titleEl) titleEl.textContent = book.title;
+  document.getElementById('ph-level').textContent = book.level;
+  document.getElementById('ph-words').textContent = book.words;
+  document.getElementById('ph-wpm').textContent = book.wpmTarget;
+  document.getElementById('story-title').textContent = book.title;
+  document.getElementById('story-sub').textContent = `Level ${book.level} · ${book.words} words · ~${Math.max(1,Math.round(book.words/book.wpmTarget))} min`;
+  document.getElementById('finish-card').classList.add('hidden');
+  buildStoryDOM(book);
+  resetTTSState();
+}
+
+function buildStoryDOM(book){
+  const el = document.getElementById('story-text');
+  el.innerHTML = '';
+  storyWords = [];
+  // Split words while keeping punctuation as separate
+  const tokens = book.text.split(/(\s+|[.,!?;:"])/);
+  let wIdx = 0;
+  tokens.forEach(tok=>{
+    if(!tok) return;
+    if(/^\s+$/.test(tok)){
+      el.appendChild(document.createTextNode(tok));
+      return;
+    }
+    if(/^[.,!?;:"]$/.test(tok)){
+      const span = document.createElement('span');
+      span.className = 'punct';
+      span.textContent = tok;
+      el.appendChild(span);
+      return;
+    }
+    const span = document.createElement('span');
+    span.className = 'w';
+    span.textContent = tok;
+    span.dataset.idx = wIdx;
+    span.addEventListener('click', ()=>{
+      // Speak single word on tap
+      speakSingle(tok);
+    });
+    el.appendChild(span);
+    storyWords.push({text:tok, idx:wIdx, node:span});
+    wIdx++;
+  });
+}
+
+function resetTTSState(){
+  stopTTS();
+  activeWordIdx = -1;
+  storyWords.forEach(w=>{
+    w.node.classList.remove('active','spoken');
+  });
+  spokenSoFarLength = 0;
+  setStatus('paused','Ready');
+  const playIcon = document.getElementById('play-icon');
+  const playLabel = document.getElementById('play-label');
+  if(playIcon) playIcon.textContent = '▶';
+  if(playLabel) playLabel.textContent = 'Read aloud';
+  clearInterval(sessionTimerInterval);
+  sessionTimerStart = 0;
+}
+
+function setStatus(stateName, text){
+  const el = document.getElementById('tts-status');
+  if(!el) return;
+  el.classList.remove('speaking','paused');
+  el.classList.add(stateName);
+  const t = document.getElementById('tts-status-text');
+  if(t) t.textContent = text;
+}
+
+function getVoices(){
+  return new Promise(resolve=>{
+    let voices = window.speechSynthesis.getVoices();
+    if(voices && voices.length){ resolve(voices); return; }
+    window.speechSynthesis.onvoiceschanged = ()=>{
+      voices = window.speechSynthesis.getVoices();
+      resolve(voices);
+    };
+    setTimeout(()=>resolve(window.speechSynthesis.getVoices()||[]), 800);
+  });
+}
+
+async function pickVoice(){
+  const voices = await getVoices();
+  // Prefer female English voices, fall back gracefully
+  const prefs = [
+    v => /Google US English/i.test(v.name),
+    v => /en-US.*Female/i.test(v.name),
+    v => /Samantha/i.test(v.name),
+    v => /Karen/i.test(v.name),
+    v => /Microsoft.*(Aria|Jenny|Online)/i.test(v.name),
+    v => /en-/i.test(v.lang),
+  ];
+  for(const test of prefs){
+    const found = voices.find(test);
+    if(found) return found;
+  }
+  return voices[0] || null;
+}
+
+async function startTTS(){
+  if(!currentBook) return;
+  if(isPaused && ttsUtterance){
+    window.speechSynthesis.resume();
+    isPaused = false;
+    setStatus('speaking','Reading aloud');
+    tickSessionTimer();
+    return;
+  }
+  if(isSpeaking) return;
+  const voice = await pickVoice();
+  const speed = parseFloat(document.getElementById('speed-sel').value) || 1;
+  const text = currentBook.text;
+  // Use sentence-based chunks so we can highlight word-by-word via boundary events
+  const sentences = text.match(/[^.!?]+[.!?]+|\S+/g) || [text];
+
+  isSpeaking = true;
+  setStatus('speaking','Reading aloud');
+  document.getElementById('play-icon').textContent = '⏸';
+  document.getElementById('play-label').textContent = 'Pause';
+  sessionTimerStart = Date.now();
+  tickSessionTimer();
+
+  speakChunk(sentences, 0, voice, speed);
+}
+
+function speakChunk(sentences, idx, voice, speed){
+  if(idx >= sentences.length){
+    finishReading();
+    return;
+  }
+  if(!isSpeaking) return;
+  const sentence = sentences[idx].trim();
+  if(!sentence){ speakChunk(sentences, idx+1, voice, speed); return; }
+
+  const utter = new SpeechSynthesisUtterance(sentence);
+  if(voice) utter.voice = voice;
+  utter.rate = speed;
+  utter.pitch = 1.05;
+  utter.onboundary = (ev)=>{
+    if(ev.name !== 'word') return;
+    // Map utterance char index to a storyWords idx
+    const charIdx = ev.charIndex;
+    // Find which word this maps to by searching remaining tokens from activeWordIdx+1
+    const next = findWordAtChar(sentence, charIdx);
+    if(next != null){
+      activeWordIdx = next;
+      highlightWord(next);
+    }
+  };
+  utter.onend = ()=>{
+    // Accumulate spoken chars (sentence + trailing space) so subsequent charIndex mappings are correct
+    spokenSoFarLength += sentence.length + 1;
+    if(!isSpeaking) return;
+    // small pause between sentences
+    setTimeout(()=>speakChunk(sentences, idx+1, voice, speed), 220);
+  };
+  utter.onerror = (e)=>{
+    if(e.error === 'canceled' || e.error === 'interrupted') return;
+    console.warn('TTS error', e);
+  };
+  ttsUtterance = utter;
+  window.speechSynthesis.speak(utter);
+}
+
+function findWordAtChar(sentence, charIdx){
+  // Compute cumulative character positions across all sentences spoken so far
+  const target = spokenSoFarLength + charIdx;
+  let acc = 0;
+  for(let i=0;i<storyWords.length;i++){
+    const w = storyWords[i];
+    const start = acc;
+    const end = acc + w.text.length;
+    if(target >= start && target < end){
+      return i;
+    }
+    acc = end + 1; // +1 for space
+  }
+  return null;
+}
+let spokenSoFarLength = 0;
+
+function tickSessionTimer(){
+  clearInterval(sessionTimerInterval);
+  sessionTimerInterval = setInterval(()=>{
+    if(!isSpeaking || isPaused) return;
+    const sec = Math.floor((Date.now()-sessionTimerStart)/1000);
+    const m = Math.floor(sec/60), s = sec%60;
+    document.getElementById('fin-time').textContent = `${m}:${String(s).padStart(2,'0')}`;
+  }, 500);
+}
+
+function pauseTTS(){
+  if(!isSpeaking) return;
+  window.speechSynthesis.pause();
+  isPaused = true;
+  setStatus('paused','Paused');
+  document.getElementById('play-icon').textContent = '▶';
+  document.getElementById('play-label').textContent = 'Resume';
+  clearInterval(sessionTimerInterval);
+}
+
+function stopTTS(){
+  isSpeaking = false;
+  isPaused = false;
+  if(window.speechSynthesis.speaking || window.speechSynthesis.pending){
+    window.speechSynthesis.cancel();
+  }
+  ttsUtterance = null;
+  clearInterval(sessionTimerInterval);
+  document.getElementById('play-icon').textContent = '▶';
+  document.getElementById('play-label').textContent = 'Read aloud';
+}
+
+function highlightWord(idx){
+  storyWords.forEach((w,i)=>{
+    w.node.classList.toggle('active', i===idx);
+    w.node.classList.toggle('spoken', i<idx);
+    if(i===idx){
+      // Scroll into view if needed
+      const r = w.node.getBoundingClientRect();
+      const container = document.getElementById('story-text');
+      const cr = container.getBoundingClientRect();
+      if(r.top < cr.top+10 || r.bottom > cr.bottom-10){
+        w.node.scrollIntoView({behavior:'smooth', block:'center'});
+      }
+    }
+  });
+}
+
+function speakSingle(word){
+  // Brief isolated pronunciation when user taps a word
+  const u = new SpeechSynthesisUtterance(word);
+  u.rate = 0.9;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
+
+function finishReading(){
+  isSpeaking = false;
+  setStatus('paused','Done');
+  document.getElementById('play-icon').textContent = '▶';
+  document.getElementById('play-label').textContent = 'Read again';
+  clearInterval(sessionTimerInterval);
+  // Mark all words as spoken
+  storyWords.forEach(w=>{w.node.classList.add('spoken');w.node.classList.remove('active');});
+  // Compute WPM
+  const elapsedSec = Math.max(1, (Date.now()-sessionTimerStart)/1000);
+  const wpm = Math.round((currentBook.words / elapsedSec) * 60);
+  const minutes = elapsedSec/60;
+  // Coverage = how many words highlighted during reading
+  const coverage = Math.round(((activeWordIdx+1) / storyWords.length) * 100);
+  const xp = computeXP(currentBook, wpm, coverage);
+  showFinishCard(currentBook, wpm, coverage, xp, minutes);
+  saveSession(currentBook, wpm, coverage, xp, minutes);
+}
+
+function computeXP(book, wpm, coverage){
+  // Base XP: words; bonus for hitting wpm target; bonus for high coverage
+  let xp = Math.round(book.words * 0.5);
+  if(wpm >= book.wpmTarget) xp += 15;
+  if(coverage >= 90) xp += 10;
+  if(coverage >= 75) xp += 5;
+  return Math.max(5, xp);
+}
+
+function showFinishCard(book, wpm, coverage, xp, minutes){
+  document.getElementById('fin-wpm').textContent = wpm;
+  document.getElementById('fin-acc').textContent = coverage + '%';
+  document.getElementById('xp-earned').textContent = xp;
+  document.getElementById('finish-card').classList.remove('hidden');
+  document.getElementById('finish-card').scrollIntoView({behavior:'smooth', block:'center'});
+  showToast(`🎉 +${xp} XP earned!`, 2500);
+}
+
+function saveSession(book, wpm, coverage, xp, minutes){
+  state.xp += xp;
+  state.wordProgress[book.id] = {lastIdx: storyWords.length, lastAt: Date.now()};
+  state.sessions.unshift({
+    bookId: book.id,
+    title: book.title,
+    level: book.level,
+    wpm, coverage, xp,
+    minutes: Math.round(minutes*10)/10,
+    at: Date.now()
+  });
+  // Keep last 50
+  state.sessions = state.sessions.slice(0, 50);
+  // Streak
+  updateStreak();
+  saveState();
+  refreshStreakPill();
+}
+
+function updateStreak(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayMs = today.getTime();
+  const last = state.lastStreakDay ? new Date(state.lastStreakDay) : null;
+  if(last){ last.setHours(0,0,0,0); }
+  if(!last){
+    state.streak = 1; state.lastStreakDay = todayMs;
+  } else {
+    const diff = Math.round((todayMs - last.getTime())/86400000);
+    if(diff === 0){
+      // already counted, no change
+    } else if(diff === 1){
+      state.streak = (state.streak||0) + 1;
+      state.lastStreakDay = todayMs;
+    } else if(diff > 1){
+      state.streak = 1;
+      state.lastStreakDay = todayMs;
+    }
+  }
+}
+
+function refreshStreakPill(){
+  const pill = document.getElementById('streak-pill');
+  const num = document.getElementById('streak-num');
+  if(state.streak && state.streak > 0){
+    pill.classList.remove('hidden');
+    num.textContent = state.streak;
+  } else {
+    pill.classList.add('hidden');
+  }
+}
+
+/* ---------- Progress view ---------- */
+function renderProgress(){
+  // Stats
+  document.getElementById('s-streak').textContent = state.streak || 0;
+  document.getElementById('s-xp').textContent = state.xp || 0;
+  const lvl = xpToLevel(state.xp||0);
+  document.getElementById('s-xp-sub').textContent = `Level ${lvl.name}`;
+  document.getElementById('s-sessions').textContent = (state.sessions||[]).length;
+  const totalMin = (state.sessions||[]).reduce((a,s)=>a + (s.minutes||0), 0);
+  document.getElementById('s-minutes').textContent = Math.round(totalMin);
+
+  // History
+  const hist = document.getElementById('history-list');
+  const sessions = state.sessions || [];
+  if(sessions.length === 0){
+    hist.innerHTML = `<div class="empty-state"><div class="ic">📖</div><p>No sessions yet — your reading history will appear here.</p><button class="btn btn-primary" data-tab="library" style="margin-top:14px">Browse Library →</button></div>`;
+  } else {
+    hist.innerHTML = sessions.map(s=>{
+      const date = new Date(s.at);
+      const when = isToday(date) ? 'Today · ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+                : isYesterday(date) ? 'Yesterday · ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+                : date.toLocaleDateString();
+      return `
+        <div class="history-row">
+          <div class="ico">L${s.level}</div>
+          <div class="info"><b>${escapeHtml(s.title)}</b><small>${when} · ${s.wpm} wpm · ${s.coverage}% coverage · ${s.minutes} min</small></div>
+          <div class="right"><b>+${s.xp}</b>XP</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Achievements
+  renderAchievements();
+}
+
+function isToday(d){ const t=new Date(); t.setHours(0,0,0,0); return d>=t; }
+function isYesterday(d){ const t=new Date(); t.setHours(0,0,0,0); const y=new Date(t); y.setDate(y.getDate()-1); return d>=y && d<t; }
+
+const ACHIEVEMENTS = [
+  {id:'first', name:'First steps', desc:'Read your first story', icon:'🌱', check: s => (s.sessions||[]).length >= 1},
+  {id:'streak3', name:'3-day streak', desc:'Read 3 days in a row', icon:'🔥', check: s => (s.streak||0) >= 3},
+  {id:'streak7', name:'Week warrior', desc:'Read 7 days in a row', icon:'🏆', check: s => (s.streak||0) >= 7},
+  {id:'xp100', name:'XP Hunter', desc:'Earn 100 XP total', icon:'⭐', check: s => (s.xp||0) >= 100},
+  {id:'xp500', name:'XP Master', desc:'Earn 500 XP total', icon:'🌟', check: s => (s.xp||0) >= 500},
+  {id:'wpm100', name:'Fast reader', desc:'Hit 100+ wpm in a session', icon:'⚡', check: s => (s.sessions||[]).some(x => x.wpm >= 100)},
+  {id:'books3', name:'Bookworm', desc:'Finish 3 different books', icon:'📚', check: s => new Set((s.sessions||[]).map(x=>x.bookId)).size >= 3},
+  {id:'all', name:'Library explorer', desc:'Read at least one book from every level', icon:'🗺️', check: s => {
+    const levels = new Set((s.sessions||[]).map(x=>x.level));
+    return levels.size >= 5;
+  }},
+];
+
+function renderAchievements(){
+  const el = document.getElementById('ach-list');
+  el.innerHTML = ACHIEVEMENTS.map(a=>{
+    const unlocked = a.check(state);
+    return `
+      <div class="ach ${unlocked?'':'locked'}">
+        <div class="ic">${a.icon}</div>
+        <div class="info"><b>${a.name}</b><small>${a.desc}</small></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function xpToLevel(xp){
+  const tiers = [
+    [0,'Reader 1'],[100,'Reader 2'],[300,'Reader 3'],[600,'Bookworm'],[1000,'Story Hunter'],[2000,'Word Wizard'],[5000,'Reading Master']
+  ];
+  let name = tiers[0][1];
+  for(const [min,n] of tiers){ if(xp >= min) name = n; }
+  return {name};
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+/* ---------- Toast ---------- */
+let toastTimer = null;
+function showToast(text, ms=2200){
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span class="em">✨</span><span>${text}</span>`;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), ms);
+}
+
+/* ---------- Buttons ---------- */
+document.getElementById('btn-play').addEventListener('click', ()=>{
+  if(!currentBook) return;
+  if(isSpeaking && !isPaused){ pauseTTS(); return; }
+  if(isPaused){ startTTS(); return; }
+  startTTS();
+});
+document.getElementById('btn-restart').addEventListener('click', ()=>{
+  if(!currentBook) return;
+  resetTTSState();
+  storyWords.forEach(w=>w.node.classList.remove('spoken','active'));
+  setTimeout(startTTS, 200);
+});
+document.getElementById('change-book').addEventListener('click', ()=>showView('library'));
+document.getElementById('btn-finish').addEventListener('click', ()=>{
+  if(!currentBook) return;
+  if(isSpeaking){ stopTTS(); }
+  // Compute partial stats
+  const elapsedSec = sessionTimerStart ? Math.max(1, (Date.now()-sessionTimerStart)/1000) : 1;
+  const wpm = Math.round((Math.max(1, activeWordIdx+1) / elapsedSec) * 60);
+  const coverage = Math.round(((activeWordIdx+1) / storyWords.length) * 100);
+  const xp = computeXP(currentBook, Math.min(wpm, currentBook.wpmTarget), coverage);
+  showFinishCard(currentBook, wpm, coverage, xp, elapsedSec/60);
+  saveSession(currentBook, wpm, coverage, xp, elapsedSec/60);
+});
+document.getElementById('fin-again').addEventListener('click', ()=>{
+  document.getElementById('finish-card').classList.add('hidden');
+  resetTTSState();
+  setTimeout(startTTS, 250);
+});
+document.getElementById('btn-export').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `readalong-kids-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 Progress exported');
+});
+document.getElementById('btn-reset').addEventListener('click', ()=>{
+  if(!confirm('Reset all progress? This cannot be undone.')) return;
+  state = {...defaultState};
+  saveState();
+  renderProgress();
+  refreshStreakPill();
+  showToast('🗑 Progress reset');
+});
+
+/* ---------- Init ---------- */
+function init(){
+  refreshStreakPill();
+  showView('home');
+  renderLibrary();
+
+  // Greeting based on time
+  const h = new Date().getHours();
+  const greet = h<12 ? 'Good morning' : h<18 ? 'Good afternoon' : 'Good evening';
+  // No external message — keep it clean
+}
+init();
+</script>
 </body>
 </html>
