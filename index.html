@@ -179,7 +179,7 @@ button{font:inherit}
 .hero-meta .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(92,214,164,.18)}
 
 /* hero phone mockup */
-.hero-visual{position:relative;min-height:480px}
+.hero-visual{position:relative;min-height:480px;display:flex;align-items:center;justify-content:center;padding:24px 0}
 .phone{
   position:relative;width:min(340px,80vw);margin:0 auto;
   aspect-ratio:9/19;
@@ -247,27 +247,7 @@ button{font:inherit}
 .reading-bar .score{font-family:var(--font-display);font-weight:700;color:#1e6b53;font-size:1.1rem}
 .reading-bar .score small{font-size:.55rem;color:#5b3a1b;display:block;font-family:var(--font-sans);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 
-.chip{
-  position:absolute;background:var(--surface);border:1px solid var(--line-2);
-  padding:10px 14px;border-radius:14px;display:flex;align-items:center;gap:10px;
-  font-size:.85rem;color:var(--ink);box-shadow:var(--shadow-1);
-  backdrop-filter:blur(6px);
-}
-.chip .ico{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:1rem}
-.chip.streak .ico{background:linear-gradient(135deg,#ffd166,#ff8a3d)}
-.chip.score .ico{background:linear-gradient(135deg,#5cd6a4,#39d3b6)}
-.chip.celebrate{animation:pop 4s ease-in-out infinite}
-.chip.streak{animation:pop 4.4s ease-in-out infinite .8s}
-.chip.score{animation:pop 4.2s ease-in-out infinite 1.6s}
-@keyframes pop{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.chip-1{top:6%;left:-6%}
-.chip-2{bottom:14%;right:-6%}
-.chip-3{top:46%;right:-12%}
-@media(max-width:600px){
-  .chip-1{left:0;top:-2%}
-  .chip-2{right:0;bottom:2%}
-  .chip-3{display:none}
-}
+/* (chips removed - hero visual is just the phone now) */
 
 /* feature cards */
 .features{display:grid;grid-template-columns:1fr;gap:18px}
@@ -573,27 +553,6 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
           </div>
         </div>
         <div class="hero-visual" aria-hidden="true">
-          <div class="chip chip-1 celebrate">
-            <div class="ico">🎉</div>
-            <div>
-              <div style="font-weight:700">Nice reading!</div>
-              <div style="color:var(--ink-3);font-size:.78rem">+15 XP earned</div>
-            </div>
-          </div>
-          <div class="chip chip-3 score">
-            <div class="ico">🎯</div>
-            <div>
-              <div style="font-weight:700">98% accuracy</div>
-              <div style="color:var(--ink-3);font-size:.78rem">Today's session</div>
-            </div>
-          </div>
-          <div class="chip chip-2 streak">
-            <div class="ico">🏆</div>
-            <div>
-              <div style="font-weight:700">5-day streak</div>
-              <div style="color:var(--ink-3);font-size:.78rem">Keep going!</div>
-            </div>
-          </div>
           <div class="phone">
             <div class="phone-screen">
               <div class="phone-status">
