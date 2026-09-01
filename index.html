@@ -347,6 +347,42 @@ button{font:inherit}
   box-shadow:var(--shadow-1);
   font-family:'Fraunces',Georgia,serif;
 }
+.narrator-picker{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 18px;
+}
+.np-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.np-eyebrow{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-2);font-weight:600}
+.np-current{font-size:.85rem;color:var(--ink-3)}
+.np-current b{color:var(--ink);font-weight:600}
+.np-options{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;
+}
+.np-opt{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px 12px;
+  cursor:pointer;
+  text-align:left;
+  transition:border-color .2s, background .2s, transform .15s;
+  font-family:inherit;color:inherit;
+  display:flex;align-items:center;gap:10px;
+}
+.np-opt:hover{border-color:rgba(255,138,61,.25);background:rgba(255,255,255,.06);transform:translateY(-1px)}
+.np-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.np-opt.active{
+  border-color:var(--narr-color, var(--accent));
+  background:linear-gradient(160deg, rgba(255,138,61,.12), rgba(57,211,182,.08));
+  box-shadow:inset 0 0 0 1px var(--narr-color, var(--accent));
+}
+.np-opt .emoji{font-size:1.4rem;line-height:1}
+.np-opt .meta{display:flex;flex-direction:column;min-width:0;flex:1}
+.np-opt .name{font-weight:600;font-size:.92rem;color:var(--ink);line-height:1.15}
+.np-opt .desc{font-size:.74rem;color:var(--ink-3);margin-top:2px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.np-opt.disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.4)}
+.np-opt.disabled:hover{transform:none;border-color:var(--line);background:rgba(255,255,255,.04)}
+.np-opt.disabled .desc{color:var(--ink-3)}
 .reader h2{font-family:var(--font-display);font-weight:700;color:#3b1d05;font-size:clamp(1.4rem,2.4vw,1.9rem);margin:0 0 6px}
 .reader .sub{color:#7a4d20;font-size:.9rem;margin-bottom:24px}
 .story-text{
@@ -679,6 +715,16 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
           <button class="btn btn-link" id="change-book">← Change book</button>
         </div>
 
+        <div class="narrator-picker" id="narrator-picker" role="radiogroup" aria-label="Choose narrator">
+          <div class="np-label">
+            <span class="np-eyebrow">🎙️ Narrator</span>
+            <span class="np-current" id="np-current"></span>
+          </div>
+          <div class="np-options" id="np-options">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
         <article class="reader" aria-live="polite">
           <div class="tts-status paused" id="tts-status">
             <span class="pulse"></span><span id="tts-status-text">Ready</span>
@@ -791,12 +837,106 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
 'use strict';
 
 /* ---------- Stories (5 levels, real content) ---------- */
+/* ---------- Narrators (5 voices with personality) ---------- */
+/*
+  Each narrator has voice-matching preferences (regexes tested against
+  browser's available voices in order). rateDefault is a *baseline*; user
+  speed control still applies as a multiplier on top via state.userSpeed.
+*/
+const NARRATORS = [
+  {
+    id:'helen',
+    name:'Grandma Helen',
+    emoji:'👵',
+    desc:'Warm & slow. Best for first-time readers.',
+    color:'#ff8a3d',
+    rateDefault:0.92, pitch:1.10,
+    prefs:[
+      v => /Karen/i.test(v.name),                  // macOS
+      v => /Microsoft.*(Aria Online|Natural)/i.test(v.name),
+      v => /Google.*(UK English Female|female)/i.test(v.name),
+      v => /en-GB.*Female/i.test(v.name),
+      v => /Samantha/i.test(v.name),
+      v => /en-(US|GB)/i.test(v.lang) && /female/i.test(v.name),
+    ]
+  },
+  {
+    id:'ben',
+    name:'Uncle Ben',
+    emoji:'🧔',
+    desc:'Friendly & adventurous. Great for story-time.',
+    color:'#ffb86b',
+    rateDefault:1.00, pitch:0.95,
+    prefs:[
+      v => /Daniel/i.test(v.name),                  // macOS
+      v => /Microsoft.*(Guy|Davis)/i.test(v.name),
+      v => /Google.*(US English|male)/i.test(v.name),
+      v => /en-(US|GB)/i.test(v.lang) && /male/i.test(v.name),
+      v => /en-US.*Male/i.test(v.name),
+    ]
+  },
+  {
+    id:'mira',
+    name:'Mira',
+    emoji:'🦊',
+    desc:'Bright & energetic. Loves silly stories.',
+    color:'#ff6b8a',
+    rateDefault:1.05, pitch:1.20,
+    prefs:[
+      v => /Samantha/i.test(v.name),
+      v => /Microsoft.*(Jenny|Aria Online)/i.test(v.name),
+      v => /Google.*(US English)/i.test(v.name),
+      v => /en-(US|GB)/i.test(v.lang) && /female/i.test(v.name),
+      v => /Victoria/i.test(v.name),
+      v => /Karen/i.test(v.name),
+    ]
+  },
+  {
+    id:'felix',
+    name:'Felix',
+    emoji:'🎩',
+    desc:'Calm storyteller. Builds chapters with care.',
+    color:'#39d3b6',
+    rateDefault:0.98, pitch:0.92,
+    prefs:[
+      v => /Daniel/i.test(v.name),
+      v => /Microsoft.*(Guy|Roger)/i.test(v.name),
+      v => /Google.*(UK English Male)/i.test(v.name),
+      v => /en-GB/i.test(v.lang) && /male/i.test(v.name),
+      v => /en-US.*Male/i.test(v.name),
+      v => /en-(US|GB)/i.test(v.lang) && /male/i.test(v.name),
+    ]
+  },
+  {
+    id:'iris',
+    name:'Iris',
+    emoji:'🌙',
+    desc:'Expressive & poetic. For dreamy tales.',
+    color:'#7d6bff',
+    rateDefault:0.95, pitch:1.05,
+    prefs:[
+      v => /Aria/i.test(v.name) && !/Online/i.test(v.name),  // macOS Aria (high quality)
+      v => /Microsoft.*Aria/i.test(v.name),
+      v => /Samantha/i.test(v.name),
+      v => /Karen/i.test(v.name),
+      v => /Google.*(UK English Female)/i.test(v.name),
+      v => /en-(US|GB)/i.test(v.lang) && /female/i.test(v.name),
+      v => /Moira/i.test(v.name),
+    ]
+  },
+];
+
+function getNarrator(id){
+  return NARRATORS.find(n => n.id === id) || NARRATORS[0];
+}
+
 const STORIES = [
   {
     id:'sun',
     level:1, title:'The Sun and the Cat',
     cover:'linear-gradient(135deg,#ffd166,#ff8a3d)',
     desc:'A warm day, a sleepy cat. Easy words, big ideas.',
+    narrator:'helen',
     words:52, wpmTarget:60,
     text:`The sun is high in the sky. A little cat sits by the door. She is warm. She is sleepy. "Meow," she says. "I will nap here in the sun." A bird sings. A bee hums. The cat closes her eyes. The sun smiles down. What a good day for a nap.`
   },
@@ -805,6 +945,7 @@ const STORIES = [
     level:1, title:'The Brave Little Fox',
     cover:'linear-gradient(135deg,#ff8a3d,#ff6b8a)',
     desc:'A small fox, a big adventure. The story that started it all.',
+    narrator:'ben',
     words:46, wpmTarget:70,
     text:`A little fox lives in the woods. He is small, but he is brave. Today he will go far. He walks by the brook. He jumps over rocks. He sees a deer. "Hello, friend!" he says. The deer nods back. The fox runs home before dark.`
   },
@@ -813,6 +954,7 @@ const STORIES = [
     level:2, title:'A Tiny Seed',
     cover:'linear-gradient(135deg,#5cd6a4,#39d3b6)',
     desc:'From a seed to a sunflower — patience and wonder.',
+    narrator:'mira',
     words:54, wpmTarget:90,
     text:`Mara found a tiny seed in the garden. She planted it in soft, dark soil. She gave it water every day. Soon a small green sprout came up. The sprout grew taller every week. By summer it was a tall sunflower with bright yellow petals. Mara smiled. One tiny seed had become something beautiful.`
   },
@@ -821,6 +963,7 @@ const STORIES = [
     level:3, title:'The Robot Who Wanted Tea',
     cover:'linear-gradient(135deg,#39d3b6,#5b8cff)',
     desc:'A friendly robot learns the joy of small daily rituals.',
+    narrator:'felix',
     words:102, wpmTarget:110,
     text:`Pip was a curious little robot who lived in a small blue house at the edge of town. Every afternoon at four o'clock, Pip watched the neighbors drink tea together. They laughed and talked while steam rose from their cups. Pip wanted to join them. But robots do not drink tea. So Pip learned to boil water, to set out cups, and to listen very carefully. Now every afternoon, Pip's house is the noisiest on the street. There is laughter, there is chatter, and there is always one cup of tea, still and warm, waiting for a robot who never drinks it.`
   },
@@ -829,6 +972,7 @@ const STORIES = [
     level:4, title:'Letters to the Stars',
     cover:'linear-gradient(135deg,#7d6bff,#ff6b8a)',
     desc:'A girl writes to the night sky — and the sky writes back.',
+    narrator:'iris',
     words:125, wpmTarget:130,
     text:`Every night before bed, Iris climbs onto the roof of her grandparents' house and writes a letter to the stars. She tells them about her day, about the dog she saw, about the strange taste of rain. She folds each letter very small, sets it on the brightest star she can find, and whispers, "Please write soon." She never expects a reply. But one morning she wakes to find a paper airplane on her windowsill. It is folded from a piece of sky-blue paper, and it smells faintly of cold air. Inside, in handwriting she does not recognize, are three words: "We are listening." From that evening on, she writes two letters each night. One for the stars, and one for whoever is listening back.`
   }
@@ -839,6 +983,8 @@ const STORAGE_KEY = 'readalong-kids-v1';
 const defaultState = {
   xp:0, sessions:[], currentBookId:null,
   wordProgress:{}, // {bookId:{lastIdx:0}}
+  narratorPrefs:{}, // {bookId: narratorId} — user override per book
+  globalNarrator:null, // if set, override per-book narrator for all books
 };
 let state = loadState();
 
@@ -933,6 +1079,7 @@ function renderLibrary(){
 
 /* ---------- Practice / TTS ---------- */
 let currentBook = null;
+let currentNarrator = null;
 let storyWords = []; // array of {text, idx}
 let activeWordIdx = -1;
 let ttsUtterance = null;
@@ -977,7 +1124,66 @@ function renderPractice(){
   document.getElementById('story-sub').textContent = `Level ${book.level} · ${book.words} words · ~${Math.max(1,Math.round(book.words/book.wpmTarget))} min`;
   document.getElementById('finish-card').classList.add('hidden');
   buildStoryDOM(book);
+  renderNarratorPicker(book);
   resetTTSState();
+}
+
+function renderNarratorPicker(book){
+  const opts = document.getElementById('np-options');
+  const cur = document.getElementById('np-current');
+  if(!opts) return;
+  // Effective narrator: user override > book default
+  const selectedId = (state.narratorPrefs && state.narratorPrefs[book.id]) || book.narrator || NARRATORS[0].id;
+  opts.innerHTML = NARRATORS.map(n => {
+    const isActive = n.id === selectedId;
+    return `
+      <button type="button" class="np-opt ${isActive ? 'active' : ''}"
+              data-narrator="${n.id}"
+              role="radio"
+              aria-checked="${isActive}"
+              style="--narr-color:${n.color}"
+              title="${n.name} — ${n.desc}">
+        <span class="emoji" aria-hidden="true">${n.emoji}</span>
+        <span class="meta">
+          <span class="name">${n.name}</span>
+          <span class="desc">${n.desc}</span>
+        </span>
+      </button>
+    `;
+  }).join('');
+  // Wire click handlers
+  opts.querySelectorAll('.np-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.narrator;
+      if(!state.narratorPrefs) state.narratorPrefs = {};
+      state.narratorPrefs[book.id] = id;
+      saveState();
+      // Update active state visually
+      opts.querySelectorAll('.np-opt').forEach(b => {
+        const active = b.dataset.narrator === id;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-checked', active ? 'true' : 'false');
+      });
+      const narr = getNarrator(id);
+      if(cur) cur.innerHTML = `Now reading with <b style="color:${narr.color}">${narr.emoji} ${narr.name}</b>`;
+      // If currently speaking, restart with new narrator
+      if(isSpeaking){
+        stopTTS();
+        // small delay to let cancel complete
+        setTimeout(() => {
+          // Re-read currentBook (already in scope)
+          resetTTSState();
+          startTTS();
+          showToast(`Switched to ${narr.name}`);
+        }, 100);
+      } else {
+        showToast(`Narrator: ${narr.name}`);
+      }
+    });
+  });
+  // Show current narrator in label
+  const narr = getNarrator(selectedId);
+  if(cur) cur.innerHTML = `Default: <b style="color:${narr.color}">${narr.emoji} ${narr.name}</b>`;
 }
 
 function buildStoryDOM(book){
@@ -1051,22 +1257,16 @@ function getVoices(){
   });
 }
 
-async function pickVoice(){
+async function pickNarratorVoice(narratorId){
+  const narrator = getNarrator(narratorId);
   const voices = await getVoices();
-  // Prefer female English voices, fall back gracefully
-  const prefs = [
-    v => /Google US English/i.test(v.name),
-    v => /en-US.*Female/i.test(v.name),
-    v => /Samantha/i.test(v.name),
-    v => /Karen/i.test(v.name),
-    v => /Microsoft.*(Aria|Jenny|Online)/i.test(v.name),
-    v => /en-/i.test(v.lang),
-  ];
-  for(const test of prefs){
+  for(const test of narrator.prefs){
     const found = voices.find(test);
-    if(found) return found;
+    if(found) return {voice:found, narrator};
   }
-  return voices[0] || null;
+  // Fallback: any English voice, then any voice
+  const anyEnglish = voices.find(v => /^en/i.test(v.lang));
+  return {voice: anyEnglish || voices[0] || null, narrator};
 }
 
 async function startTTS(){
@@ -1079,35 +1279,43 @@ async function startTTS(){
     return;
   }
   if(isSpeaking) return;
-  const voice = await pickVoice();
-  const speed = parseFloat(document.getElementById('speed-sel').value) || 1;
+  // Determine narrator for this book (user override > book default > first narrator)
+  const narratorId = (state.narratorPrefs && state.narratorPrefs[currentBook.id])
+                  || currentBook.narrator
+                  || NARRATORS[0].id;
+  const {voice, narrator} = await pickNarratorVoice(narratorId);
+  currentNarrator = narrator;
+  const userSpeed = parseFloat(document.getElementById('speed-sel').value) || 1;
+  // Effective rate = narrator baseline × user speed control
+  const speed = Math.max(0.5, Math.min(2.0, narrator.rateDefault * userSpeed));
+  const pitch = narrator.pitch;
   const text = currentBook.text;
   // Use sentence-based chunks so we can highlight word-by-word via boundary events
   const sentences = text.match(/[^.!?]+[.!?]+|\S+/g) || [text];
 
   isSpeaking = true;
-  setStatus('speaking','Reading aloud');
+  setStatus('speaking', `Reading with ${narrator.name}`);
   document.getElementById('play-icon').textContent = '⏸';
   document.getElementById('play-label').textContent = 'Pause';
   sessionTimerStart = Date.now();
   tickSessionTimer();
 
-  speakChunk(sentences, 0, voice, speed);
+  speakChunk(sentences, 0, voice, speed, pitch, narrator);
 }
 
-function speakChunk(sentences, idx, voice, speed){
+function speakChunk(sentences, idx, voice, speed, pitch, narrator){
   if(idx >= sentences.length){
     finishReading();
     return;
   }
   if(!isSpeaking) return;
   const sentence = sentences[idx].trim();
-  if(!sentence){ speakChunk(sentences, idx+1, voice, speed); return; }
+  if(!sentence){ speakChunk(sentences, idx+1, voice, speed, pitch, narrator); return; }
 
   const utter = new SpeechSynthesisUtterance(sentence);
   if(voice) utter.voice = voice;
   utter.rate = speed;
-  utter.pitch = 1.05;
+  utter.pitch = pitch;
   utter.onboundary = (ev)=>{
     if(ev.name !== 'word') return;
     // Map utterance char index to a storyWords idx
@@ -1124,7 +1332,7 @@ function speakChunk(sentences, idx, voice, speed){
     spokenSoFarLength += sentence.length + 1;
     if(!isSpeaking) return;
     // small pause between sentences
-    setTimeout(()=>speakChunk(sentences, idx+1, voice, speed), 220);
+    setTimeout(()=>speakChunk(sentences, idx+1, voice, speed, pitch, narrator), 220);
   };
   utter.onerror = (e)=>{
     if(e.error === 'canceled' || e.error === 'interrupted') return;
