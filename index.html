@@ -92,15 +92,77 @@ button{font:inherit}
 .tab.active{background:rgba(255,138,61,.18);color:var(--ink);box-shadow:inset 0 0 0 1px rgba(255,138,61,.3)}
 .tab .ic{font-size:1rem;line-height:1}
 .nav-cta{display:flex;align-items:center;gap:10px}
+
+/* Splash screen (first-time language picker) */
+.splash{
+  position:fixed;inset:0;z-index:200;
+  background:radial-gradient(900px 600px at 80% -10%, rgba(255,138,61,.22), 0 60%),
+             radial-gradient(700px 500px at -10% 20%, rgba(57,211,182,.16), 0 60%),
+             var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  animation:fadeIn .35s ease-out;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+.splash.hide{animation:fadeOut .35s ease-out forwards;pointer-events:none}
+.splash-inner{max-width:680px;width:100%;text-align:center}
+.splash-eyebrow{
+  display:inline-flex;align-items:center;gap:.5em;
+  font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent-2);font-weight:600;
+  padding:.5em 1em;border:1px solid rgba(255,184,107,.25);border-radius:999px;
+  background:rgba(255,138,61,.08);
+  margin-bottom:18px;
+}
+.splash h1{font-size:clamp(2.2rem,5vw,3.4rem);margin:.4em 0 .2em;line-height:1.1}
+.splash .splash-sub{color:var(--ink-3);font-size:1rem;margin-bottom:8px}
+.splash .splash-sub b{color:var(--ink-2);font-weight:500}
+.lang-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:28px}
+@media(min-width:560px){.lang-grid{grid-template-columns:1fr 1fr;gap:20px}}
+.lang-btn{
+  background:linear-gradient(160deg,var(--surface),var(--bg-2));
+  border:1px solid var(--line);border-radius:var(--radius-lg);
+  padding:24px 22px;cursor:pointer;color:var(--ink);font-family:inherit;text-align:left;
+  transition:transform .2s var(--ease),border-color .2s,box-shadow .25s;
+  display:flex;flex-direction:column;gap:8px;
+}
+.lang-btn:hover{transform:translateY(-3px);border-color:rgba(255,138,61,.4);box-shadow:var(--shadow-1)}
+.lang-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lang-btn .lb-top{display:flex;align-items:center;gap:14px}
+.lang-btn .lb-flag{font-size:2.4rem;line-height:1}
+.lang-btn .lb-name{font-family:var(--font-display);font-weight:700;font-size:1.4rem;color:var(--ink);line-height:1.1}
+.lang-btn .lb-native{color:var(--ink-3);font-size:.85rem;font-style:italic;margin-top:2px}
+.lang-btn .lb-desc{color:var(--ink-2);font-size:.92rem;line-height:1.4;margin-top:6px}
+.lang-btn .lb-cta{display:inline-flex;align-items:center;gap:.4rem;color:var(--accent-2);font-size:.85rem;font-weight:600;margin-top:6px}
+.lang-btn .lb-cta .arrow{transition:transform .2s}
+.lang-btn:hover .lb-cta .arrow{transform:translateX(3px)}
 .streak-pill{
   display:inline-flex;align-items:center;gap:.4rem;
   background:rgba(255,209,102,.12);border:1px solid rgba(255,209,102,.3);
-  color:var(--gold);padding:.45rem .75rem;border-radius:999px;font-size:.82rem;font-weight:600;
+  color:var(--gold);padding:.45rem;rem;border-radius:999px;font-size:.82rem;font-weight:600;
 }
 .streak-pill.hidden{display:none}
 @media(max-width:880px){
   .tabs{display:none}
 }
+
+/* Language toggle (header) */
+.lang-toggle{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line-2);
+  color:var(--ink);
+  padding:.45rem .85rem;border-radius:999px;
+  cursor:pointer;
+  font-family:inherit;font-weight:600;font-size:.85rem;
+  transition:background .2s,border-color .2s,transform .15s;
+}
+.lang-toggle:hover{background:rgba(255,255,255,.1);border-color:rgba(255,138,61,.4);transform:translateY(-1px)}
+.lang-toggle:active{transform:translateY(0)}
+.lang-toggle .lang-flag{font-size:1.1rem;line-height:1;display:inline-block}
+.lang-toggle .lang-text{letter-spacing:.06em;color:var(--ink-2);min-width:24px;text-align:center}
+.lang-toggle.is-ro .lang-text{color:var(--accent)}
 
 /* Mobile bottom nav */
 .bottom-nav{
@@ -539,6 +601,39 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
 </head>
 <body>
 
+<!-- ========== SPLASH (language picker, first visit) ========== -->
+<div class="splash" id="splash" role="dialog" aria-labelledby="splash-title" aria-modal="true">
+  <div class="splash-inner">
+    <span class="splash-eyebrow">🌍 ReadAlong Kids</span>
+    <h1 id="splash-title">Choose your language</h1>
+    <p class="splash-sub"><b>Alege limba</b> · Two short stories per level · Local-first</p>
+    <div class="lang-grid">
+      <button class="lang-btn" data-pick-lang="en" aria-label="English">
+        <div class="lb-top">
+          <span class="lb-flag">🇬🇧</span>
+          <div>
+            <div class="lb-name">English</div>
+            <div class="lb-native">Stories & narration in English</div>
+          </div>
+        </div>
+        <p class="lb-desc">Warm narrators (Grandma Helen, Uncle Ben, Mira) read short leveled stories.</p>
+        <span class="lb-cta">Continue <span class="arrow">→</span></span>
+      </button>
+      <button class="lang-btn" data-pick-lang="ro" aria-label="Română">
+        <div class="lb-top">
+          <span class="lb-flag">🇷🇴</span>
+          <div>
+            <div class="lb-name">Română</div>
+            <div class="lb-native">Povești și narare în română</div>
+          </div>
+        </div>
+        <p class="lb-desc">Mătușa Ioana și Bunicul Andrei citesc aceleași povești, traduse natural.</p>
+        <span class="lb-cta">Continuă <span class="arrow">→</span></span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ========== NAV ========== -->
 <header class="nav">
   <div class="wrap nav-inner">
@@ -547,13 +642,18 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
       <span class="brand-name">ReadAlong <b>Kids</b></span>
     </a>
     <nav class="tabs" aria-label="Main views" role="tablist">
-      <button class="tab" data-tab="home" role="tab"><span class="ic">🏠</span>Home</button>
-      <button class="tab" data-tab="library" role="tab"><span class="ic">📚</span>Library</button>
-      <button class="tab" data-tab="practice" role="tab"><span class="ic">🎧</span>Practice</button>
-      <button class="tab" data-tab="progress" role="tab"><span class="ic">📈</span>Progress</button>
+      <button class="tab" data-tab="home" role="tab"><span class="ic">🏠</span><span class="tab-label" data-key="tabHome">Home</span></button>
+      <button class="tab" data-tab="library" role="tab"><span class="ic">📚</span><span class="tab-label" data-key="tabLibrary">Library</span></button>
+      <button class="tab" data-tab="practice" role="tab"><span class="ic">🎧</span><span class="tab-label" data-key="tabPractice">Practice</span></button>
+      <button class="tab" data-tab="progress" role="tab"><span class="ic">📈</span><span class="tab-label" data-key="tabProgress">Progress</span></button>
     </nav>
     <div class="nav-cta">
-      <span id="streak-pill" class="streak-pill hidden" title="Current streak">🔥 <span id="streak-num">0</span> day streak</span>
+      <button class="lang-toggle" id="lang-toggle" aria-label="Toggle language">
+        <span class="lang-flag" data-lang-flag="en">🇬🇧</span>
+        <span class="lang-flag hidden" data-lang-flag="ro">🇷🇴</span>
+        <span class="lang-text" id="lang-text">EN</span>
+      </button>
+      <span id="streak-pill" class="streak-pill hidden" title="Current streak">🔥 <span id="streak-num">0</span></span>
     </div>
   </div>
 </header>
@@ -808,10 +908,14 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
 
 <!-- ========== MOBILE BOTTOM NAV ========== -->
 <nav class="bottom-nav" aria-label="Mobile navigation">
-  <button class="tab active" data-tab="home" role="tab"><span class="ic">🏠</span>Home</button>
-  <button class="tab" data-tab="library" role="tab"><span class="ic">📚</span>Library</button>
-  <button class="tab" data-tab="practice" role="tab"><span class="ic">🎧</span>Practice</button>
-  <button class="tab" data-tab="progress" role="tab"><span class="ic">📈</span>Progress</button>
+  <button class="tab active" data-tab="home" role="tab"><span class="ic">🏠</span><span class="tab-label" data-key="tabHome">Home</span></button>
+  <button class="tab" data-tab="library" role="tab"><span class="ic">📚</span><span class="tab-label" data-key="tabLibrary">Library</span></button>
+  <button class="tab" data-tab="practice" role="tab"><span class="ic">🎧</span><span class="tab-label" data-key="tabPractice">Practice</span></button>
+  <button class="tab" data-tab="progress" role="tab"><span class="ic">📈</span><span class="tab-label" data-key="tabProgress">Progress</span></button>
+  <button class="tab lang-mobile" id="lang-mobile" aria-label="Toggle language">
+    <span class="ic" id="lang-mobile-flag">🇬🇧</span>
+    <span class="tab-label" id="lang-mobile-text">EN</span>
+  </button>
 </nav>
 
 <!-- ========== FOOTER ========== -->
@@ -831,12 +935,365 @@ footer{padding:60px 0 40px;border-top:1px solid var(--line);background:linear-gr
 
 <script>
 /* =====================================================
-   ReadAlong Kids — fully functional SPA
+   ReadAlong Kids — bilingual SPA (EN + RO)
    Single-file vanilla JS. No dependencies.
    ===================================================== */
 'use strict';
 
-/* ---------- Stories (5 levels, real content) ---------- */
+/* ---------- i18n: all UI strings ---------- */
+const STRINGS = {
+  en: {
+    siteName: 'ReadAlong Kids',
+    tagline: 'For ages 5–10 · Parent-built',
+    heroTitle1: 'Turn daily reading into',
+    heroTitle2: 'visible fluency gains',
+    heroLead: 'A 10-minute AI read-aloud companion. Your child reads along, words light up in real time, and you get a weekly progress report straight to your phone.',
+    ctaOpenLibrary: 'Open Library',
+    ctaTrySample: 'Try a sample',
+    metaSpots: '100 founding-family spots open',
+    metaPlatform: 'iOS · Web · No install',
+    featuresEyebrow: 'What you get',
+    featuresHeadline: 'Three things parents actually need',
+    feat1Title: 'Real-time word highlighting',
+    feat1Desc: 'Children read along as the AI voice narrates. Each word lights up so they never lose their place — even on tricky pages.',
+    feat2Title: 'Leveled library, 5 difficulty tiers',
+    feat2Desc: 'From early-reader picture books to chapter-book fluency — short stories your child can actually finish in 5–10 minutes.',
+    feat3Title: 'Honest progress, no vanity metrics',
+    feat3Desc: 'Words-per-minute, accuracy, streak days, and the books that took the longest. All stored locally on your device — kid-safe by default.',
+    quote1: '"She went from avoiding books to asking for \'one more story\' every night."',
+    quote2: '"The weekly summary told me he was stuck on a few words. We practiced together for 10 minutes — huge jump."',
+    quote3: '"Better than any tutor we\'ve tried, and my kid actually wants to use it."',
+    quote1By: 'Andrei · dad of 6-y/o Mara',
+    quote2By: 'Elena · mom of 8-y/o David',
+    quote3By: 'Roxana · mom of 7-y/o Ana',
+    tabHome: 'Home',
+    tabLibrary: 'Library',
+    tabPractice: 'Practice',
+    tabProgress: 'Progress',
+    streakPill: (n) => `🔥 ${n} day streak`,
+    libraryEyebrow: '📚 Library',
+    libraryHeadline: 'Pick a story to read together',
+    libraryLead: 'Short, leveled stories your child can finish in 5–10 minutes. Click any book to start reading.',
+    filterAll: 'All levels',
+    filterLevel: (n, name) => `Level ${n} · ${name}`,
+    levelNames: ['Beginner','Early','Growing','Confident','Fluent'],
+    bookNew: 'New',
+    bookProgress: (pct) => `${pct}%`,
+    practiceEyebrow: '🎧 Practice',
+    practiceDefaultHeadline: 'Pick a story from the Library',
+    practiceDefaultLead: 'Press play. Read along. Words light up as the AI voice narrates.',
+    practiceEmpty: 'No book selected',
+    practiceEmptyDesc: 'Open the Library and pick a story to start reading.',
+    practiceGoLibrary: 'Go to Library →',
+    phLevel: 'Level',
+    phWords: 'words',
+    phWpm: 'wpm target',
+    changeBook: '← Change book',
+    narratorLabel: '🎙️ Narrator',
+    narratorDefault: (name, emoji) => `Default: ${emoji} ${name}`,
+    narratorNow: (name, emoji) => `Now reading with ${emoji} ${name}`,
+    statusReady: 'Ready',
+    statusPaused: 'Paused',
+    statusSpeaking: (n) => `Reading with ${n}`,
+    subMeta: (l, w, m) => `Level ${l} · ${w} words · ~${m} min`,
+    playRead: 'Read aloud',
+    playPause: 'Pause',
+    playResume: 'Resume',
+    playAgain: 'Read again',
+    btnRestart: '↺ Restart',
+    btnDone: '✓ Done',
+    speedLabel: 'Speed',
+    speedSlow: '0.7× · slow',
+    speedNormal: '1× · normal',
+    speedFast: '1.15×',
+    finishTitle: 'Nice reading!',
+    finishXp: (n) => `+${n} XP earned`,
+    finishTime: 'Time',
+    finishWpm: 'Words / min',
+    finishCov: 'Coverage',
+    finishPickAnother: 'Pick another book',
+    finishSeeProgress: 'See progress',
+    progressEyebrow: '📈 Progress',
+    progressHeadline: 'Your reading journey',
+    progressLead: 'All stats stay on this device. Export anytime.',
+    statStreak: 'Streak',
+    statStreakSub: 'days in a row',
+    statXp: 'Total XP',
+    statXpSub: (n) => `Level ${n}`,
+    statSessions: 'Sessions',
+    statSessionsSub: 'completed',
+    statMinutes: 'Reading time',
+    statMinutesSub: 'minutes',
+    historyTitle: 'Recent sessions',
+    historyEmpty: 'No sessions yet — your reading history will appear here.',
+    historyEmptyCta: 'Browse Library →',
+    achTitle: 'Achievements',
+    btnExport: '📥 Export progress (JSON)',
+    btnReset: '🗑 Reset progress',
+    toastExported: 'Progress exported',
+    toastReset: 'Progress reset',
+    toastNarrator: (n) => `Narrator: ${n}`,
+    toastSwitched: (n) => `Switched to ${n}`,
+    xpLevelNames: ['Reader 1','Reader 2','Reader 3','Bookworm','Story Hunter','Word Wizard','Reading Master'],
+    achFirst: 'First steps',
+    achFirstDesc: 'Read your first story',
+    achStreak3: '3-day streak',
+    achStreak3Desc: 'Read 3 days in a row',
+    achStreak7: 'Week warrior',
+    achStreak7Desc: 'Read 7 days in a row',
+    achXp100: 'XP Hunter',
+    achXp100Desc: 'Earn 100 XP total',
+    achXp500: 'XP Master',
+    achXp500Desc: 'Earn 500 XP total',
+    achWpm100: 'Fast reader',
+    achWpm100Desc: 'Hit 100+ wpm in a session',
+    achBooks3: 'Bookworm',
+    achBooks3Desc: 'Finish 3 different books',
+    achAll: 'Library explorer',
+    achAllDesc: 'Read at least one book from every level',
+    footerCopy: '© 2026 ReadAlong Kids · Built for ages 5–10',
+    splashTitle: 'Choose your language',
+    splashLead: 'Alege limba',
+    splashEn: 'English',
+    splashEnDesc: 'Stories & narration in English',
+    splashRo: 'Română',
+    splashRoDesc: 'Povești și narare în română',
+    todayAt: 'Today',
+    yesterday: 'Yesterday',
+    todayTime: (t) => `Today · ${t}`,
+    yesterdayTime: (t) => `Yesterday · ${t}`,
+    confirmReset: 'Reset all progress? This cannot be undone.',
+    phoneMockup: {
+      bookMeta: 'Level J · 142 words · 6 min',
+      reading: 'Reading along with Mia…',
+      nowReading: 'The fox ran through the forest.',
+      nowPill: 'NOW',
+      pillAi: 'AI',
+      reader: 'Mia · Age 7',
+      subline: '3 / 5 sessions this week',
+      score: 'A+',
+      scoreLabel: 'Score',
+      chip1Title: 'Nice reading!',
+      chip1Sub: '+15 XP earned',
+    },
+  },
+  ro: {
+    siteName: 'ReadAlong Kids',
+    tagline: 'Pentru vârste 5–10 · Creat de părinți',
+    heroTitle1: 'Transformă cititul zilnic în',
+    heroTitle2: 'progres vizibil',
+    heroLead: 'Un companion AI de citit cu voce tare, 10 minute pe zi. Copilul tău citește împreună, cuvintele se aprind în timp real, și primești un raport sânptămânal direct pe telefon.',
+    ctaOpenLibrary: 'Deschide Biblioteca',
+    ctaTrySample: 'Încearcă o poveste',
+    metaSpots: '100 locuri deschise pentru familii fondatoare',
+    metaPlatform: 'iOS · Web · Fără instalare',
+    featuresEyebrow: 'Ce primești',
+    featuresHeadline: 'Trei lucruri de care părinții au nevoie',
+    feat1Title: 'Cuvinte evidențiate în timp real',
+    feat1Desc: 'Copiii citesc împreună cu vocea AI. Fiecare cuvânt se aprinde, ca să nu piardă niciodată rândul — nici pe paginile grele.',
+    feat2Title: 'Bibliotecă pe niveluri, 5 trepte',
+    feat2Desc: 'De la cărți pentru începători până la capitole — povești scurte pe care copilul le termină în 5–10 minute.',
+    feat3Title: 'Progres onest, fără cifre vanitoase',
+    feat3Desc: 'Cuvinte pe minut, acuratețe, zile de streak și cărțile care au luat cel mai mult timp. Toate stau local pe dispozitiv — sigur pentru copii.',
+    quote1: '"A trecut de la a evita cărțile la a cere \'încă o poveste\' în fiecare seară."',
+    quote2: '"Rezumatul sânptămânal mi-a arătat că se blocase pe câteva cuvinte. Am exersat împreună 10 minute — salt uriaș."',
+    quote3: '"Mai bun decât orice meditator pe care l-am încercat, și copilul meu chiar vrea să-l folosească."',
+    quote1By: 'Andrei · tatăl Marei, 6 ani',
+    quote2By: 'Elena · mama lui David, 8 ani',
+    quote3By: 'Roxana · mama Anei, 7 ani',
+    tabHome: 'Acasă',
+    tabLibrary: 'Bibliotecă',
+    tabPractice: 'Citit',
+    tabProgress: 'Progres',
+    streakPill: (n) => `🔥 ${n} zile streak`,
+    libraryEyebrow: '📚 Bibliotecă',
+    libraryHeadline: 'Alege o poveste de citit împreună',
+    libraryLead: 'Povești scurte, pe niveluri, pe care copilul le termină în 5–10 minute. Apasă pe orice carte pentru a începe.',
+    filterAll: 'Toate nivelurile',
+    filterLevel: (n, name) => `Nivel ${n} · ${name}`,
+    levelNames: ['Începător','Ușor','Mediu','Avansat','Fluent'],
+    bookNew: 'Nouă',
+    bookProgress: (pct) => `${pct}%`,
+    practiceEyebrow: '🎧 Citit',
+    practiceDefaultHeadline: 'Alege o poveste din Bibliotecă',
+    practiceDefaultLead: 'Apasă play. Citește împreună. Cuvintele se aprind pe măsură ce vocea AI le citește.',
+    practiceEmpty: 'Nicio carte selectată',
+    practiceEmptyDesc: 'Deschide Biblioteca și alege o poveste pentru a începe.',
+    practiceGoLibrary: 'Mergi la Bibliotecă →',
+    phLevel: 'Nivel',
+    phWords: 'cuvinte',
+    phWpm: 'wpm țintă',
+    changeBook: '← Schimbă cartea',
+    narratorLabel: '🎙️ Narator',
+    narratorDefault: (name, emoji) => `Implicit: ${emoji} ${name}`,
+    narratorNow: (name, emoji) => `Acum citește ${name} ${emoji}`,
+    statusReady: 'Pregătit',
+    statusPaused: 'Pauză',
+    statusSpeaking: (n) => `Citește cu ${n}`,
+    subMeta: (l, w, m) => `Nivel ${l} · ${w} cuvinte · ~${m} min`,
+    playRead: 'Citește cu voce',
+    playPause: 'Pauză',
+    playResume: 'Continuă',
+    playAgain: 'Citește din nou',
+    btnRestart: '↺ Restartează',
+    btnDone: '✓ Gata',
+    speedLabel: 'Viteză',
+    speedSlow: '0.7× · lent',
+    speedNormal: '1× · normal',
+    speedFast: '1.15×',
+    finishTitle: 'Foarte bine!',
+    finishXp: (n) => `+${n} XP câștigate`,
+    finishTime: 'Timp',
+    finishWpm: 'Cuvinte / min',
+    finishCov: 'Acoperire',
+    finishPickAnother: 'Alege altă carte',
+    finishSeeProgress: 'Vezi progres',
+    progressEyebrow: '📈 Progres',
+    progressHeadline: 'Călătoria ta în citit',
+    progressLead: 'Toate statisticile rămân pe acest dispozitiv. Exportă oricând.',
+    statStreak: 'Streak',
+    statStreakSub: 'zile la rând',
+    statXp: 'XP total',
+    statXpSub: (n) => `Nivel ${n}`,
+    statSessions: 'Sesiuni',
+    statSessionsSub: 'finalizate',
+    statMinutes: 'Timp de citit',
+    statMinutesSub: 'minute',
+    historyTitle: 'Sesiuni recente',
+    historyEmpty: 'Nicio sesiune încă — istoricul tău va apărea aici.',
+    historyEmptyCta: 'Răsfoiește Biblioteca →',
+    achTitle: 'Realizări',
+    btnExport: '📥 Exportă progresul (JSON)',
+    btnReset: '🗑 Resetează progresul',
+    toastExported: 'Progres exportat',
+    toastReset: 'Progres resetat',
+    toastNarrator: (n) => `Narator: ${n}`,
+    toastSwitched: (n) => `Schimbat pe ${n}`,
+    xpLevelNames: ['Cititor 1','Cititor 2','Cititor 3','Cititor avid','Vânztor de povești','Mag al cuvintelor','Maestru al cititului'],
+    achFirst: 'Primii pași',
+    achFirstDesc: 'Citește prima ta poveste',
+    achStreak3: 'Streak de 3 zile',
+    achStreak3Desc: 'Citește 3 zile la rând',
+    achStreak7: 'Războinic al sânptămânii',
+    achStreak7Desc: 'Citește 7 zile la rând',
+    achXp100: 'Vânztor de XP',
+    achXp100Desc: 'Câștigă 100 XP în total',
+    achXp500: 'Maestru al XP-ului',
+    achXp500Desc: 'Câștigă 500 XP în total',
+    achWpm100: 'Cititor rapid',
+    achWpm100Desc: 'Ajunge la 100+ wpm într-o sesiune',
+    achBooks3: 'Cititor dedicat',
+    achBooks3Desc: 'Termină 3 cărți diferite',
+    achAll: 'Explorator al bibliotecii',
+    achAllDesc: 'Citește cel puțin o carte din fiecare nivel',
+    footerCopy: '© 2026 ReadAlong Kids · Creat pentru vârste 5–10',
+    splashTitle: 'Alege limba',
+    splashLead: 'Choose your language',
+    splashEn: 'English',
+    splashEnDesc: 'Povești și narare în engleză',
+    splashRo: 'Română',
+    splashRoDesc: 'Povești și narare în română',
+    todayAt: 'Azi',
+    yesterday: 'Ieri',
+    todayTime: (t) => `Azi · ${t}`,
+    yesterdayTime: (t) => `Ieri · ${t}`,
+    confirmReset: 'Resetezi tot progresul? Acțiunea nu poate fi anulată.',
+    phoneMockup: {
+      bookMeta: 'Nivel J · 142 cuvinte · 6 min',
+      reading: 'Citește împreună cu Mia…',
+      nowReading: 'Vulpea a trecut prin pădure.',
+      nowPill: 'ACUM',
+      pillAi: 'AI',
+      reader: 'Mia · 7 ani',
+      subline: '3 / 5 sesiuni în sânptămâna asta',
+      score: 'A+',
+      scoreLabel: 'Scor',
+      chip1Title: 'Bravo!',
+      chip1Sub: '+15 XP câștigate',
+    },
+  },
+};
+
+function t(key, ...args){
+  const lang = (state && state.lang) || 'en';
+  const s = STRINGS[lang] || STRINGS.en;
+  const v = s[key];
+  if(typeof v === 'function') return v(...args);
+  if(v == null) return (STRINGS.en[key] != null ? (typeof STRINGS.en[key] === 'function' ? STRINGS.en[key](...args) : STRINGS.en[key]) : key);
+  return v;
+}
+
+/* ---------- Language switching ---------- */
+function setLang(lang, opts){
+  if(!STRINGS[lang]) lang = 'en';
+  state.lang = lang;
+  saveState();
+  applyLang();
+  if(opts && opts.after) opts.after();
+}
+
+function applyLang(){
+  const lang = state.lang || 'en';
+  // Update <html lang>
+  document.documentElement.lang = lang;
+  // Update title
+  const siteName = t('siteName');
+  document.title = lang === 'ro'
+    ? `${siteName} — Companion AI de citit cu voce tare, pentru vârste 5–10`
+    : `${siteName} — AI Read-Aloud Companion for Ages 5–10`;
+  // Update lang=RO flag on phone mockup
+  document.querySelectorAll('[data-key]').forEach(el => {
+    const key = el.dataset.key;
+    const val = t(key);
+    if(val != null) el.textContent = val;
+  });
+  // Update flags visible
+  document.querySelectorAll('[data-lang-flag]').forEach(el => {
+    el.classList.toggle('hidden', el.dataset.langFlag !== lang);
+  });
+  // Update lang toggle button text & class
+  const lt = document.getElementById('lang-toggle');
+  if(lt) {
+    lt.classList.toggle('is-ro', lang === 'ro');
+    const txt = document.getElementById('lang-text');
+    if(txt) txt.textContent = lang === 'ro' ? 'RO' : 'EN';
+  }
+  const lmf = document.getElementById('lang-mobile-flag');
+  const lmt = document.getElementById('lang-mobile-text');
+  if(lmf) lmf.textContent = lang === 'ro' ? '🇷🇴' : '🇬🇧';
+  if(lmt) lmt.textContent = lang === 'ro' ? 'RO' : 'EN';
+  // Update tab active state refresh (because of class)
+  document.querySelectorAll('.tab[data-tab]').forEach(b => {
+    // active stays on whatever view
+  });
+  // Re-render the active view if needed
+  const activeView = VIEWS.find(v => {
+    const el = document.getElementById('view-'+v);
+    return el && !el.classList.contains('hidden');
+  }) || 'home';
+  if(activeView === 'library') renderLibrary();
+  if(activeView === 'practice') renderPractice();
+  if(activeView === 'progress') renderProgress();
+  refreshStreakPill();
+}
+
+function hideSplash(){
+  const splash = document.getElementById('splash');
+  if(!splash) return;
+  splash.classList.add('hide');
+  setTimeout(() => splash.remove(), 400);
+}
+
+function maybeShowSplash(){
+  if(state.lang) {
+    // already chosen — just hide
+    hideSplash();
+    return false;
+  }
+  return true;
+}
+
+/* ---------- Stories (5 levels, EN + RO) ---------- */
 /* ---------- Narrators (5 voices with personality) ---------- */
 /*
   Each narrator has voice-matching preferences (regexes tested against
@@ -851,6 +1308,7 @@ const NARRATORS = [
     desc:'Warm & slow. Best for first-time readers.',
     color:'#ff8a3d',
     rateDefault:0.78, pitch:1.08,
+    lang:'en',
     prefs:[
       v => /Karen/i.test(v.name),                  // macOS
       v => /Microsoft.*(Aria Online|Natural)/i.test(v.name),
@@ -867,6 +1325,7 @@ const NARRATORS = [
     desc:'Friendly & adventurous. Great for story-time.',
     color:'#ffb86b',
     rateDefault:0.82, pitch:0.95,
+    lang:'en',
     prefs:[
       v => /Daniel/i.test(v.name),                  // macOS
       v => /Microsoft.*(Guy|Davis)/i.test(v.name),
@@ -882,6 +1341,7 @@ const NARRATORS = [
     desc:'Bright & energetic. Loves silly stories.',
     color:'#ff6b8a',
     rateDefault:0.85, pitch:1.15,
+    lang:'en',
     prefs:[
       v => /Samantha/i.test(v.name),
       v => /Microsoft.*(Jenny|Aria Online)/i.test(v.name),
@@ -898,6 +1358,7 @@ const NARRATORS = [
     desc:'Calm storyteller. Builds chapters with care.',
     color:'#39d3b6',
     rateDefault:0.80, pitch:0.92,
+    lang:'en',
     prefs:[
       v => /Daniel/i.test(v.name),
       v => /Microsoft.*(Guy|Roger)/i.test(v.name),
@@ -914,6 +1375,7 @@ const NARRATORS = [
     desc:'Expressive & poetic. For dreamy tales.',
     color:'#7d6bff',
     rateDefault:0.78, pitch:1.05,
+    lang:'en',
     prefs:[
       v => /Aria/i.test(v.name) && !/Online/i.test(v.name),  // macOS Aria (high quality)
       v => /Microsoft.*Aria/i.test(v.name),
@@ -922,6 +1384,43 @@ const NARRATORS = [
       v => /Google.*(UK English Female)/i.test(v.name),
       v => /en-(US|GB)/i.test(v.lang) && /female/i.test(v.name),
       v => /Moira/i.test(v.name),
+    ]
+  },
+  {
+    id:'ioana',
+    name:'Mătușa Ioana',
+    nameEn:'Aunt Ioana',
+    emoji:'🧕',
+    desc:'Caldă și blândă. Perfectă pentru citit seara.',
+    descEn:'Warm & gentle. Perfect for bedtime reading.',
+    color:'#ff6b8a',
+    rateDefault:0.80, pitch:1.10,
+    lang:'ro',
+    prefs:[
+      v => /Ioana/i.test(v.name),                  // macOS Romanian
+      v => /Microsoft.*Andreea/i.test(v.name),
+      v => /ro-RO/i.test(v.lang),
+      v => /Microsoft.*(Natural|Online).*Romanian/i.test(v.name),
+      v => /romanian/i.test(v.name),
+      v => /Andrei/i.test(v.name) && /Romanian/i.test(v.name),
+    ]
+  },
+  {
+    id:'andrei',
+    name:'Bunicul Andrei',
+    nameEn:'Grandpa Andrei',
+    emoji:'🧓',
+    desc:'Răbdător și liniștit. Voce caldă de povestitor.',
+    descEn:'Patient and calm. A warm storyteller voice.',
+    color:'#39d3b6',
+    rateDefault:0.78, pitch:0.92,
+    lang:'ro',
+    prefs:[
+      v => /Andrei/i.test(v.name),                  // macOS Romanian male
+      v => /Microsoft.*(Andrei|Romanian Male)/i.test(v.name),
+      v => /ro-RO/i.test(v.lang) && /male/i.test(v.name),
+      v => /romanian/i.test(v.name) && /male/i.test(v.name),
+      v => /ro-RO/i.test(v.lang),
     ]
   },
 ];
@@ -934,25 +1433,38 @@ const STORIES = [
   {
     id:'sun',
     level:1, title:'The Sun and the Cat',
+    titleRo:'Soarele și pisica',
     cover:'linear-gradient(135deg,#ffd166,#ff8a3d)',
     desc:'A warm day, a sleepy cat. Easy words, big ideas.',
+    descRo:'O zi caldă, o pisică somnoroasă. Cuvinte simple, idei mari.',
     narrator:'helen',
     words:138, wpmTarget:60,
+    lang:'en',
     text:`The sun is high in the sky. A little cat sits by the door. She is warm. She is sleepy. "Meow," she says. "I will nap here in the sun."
 
 A bird sings on the fence. A bee hums near the flowers. The cat opens one eye. Then she closes it again. The sun is so warm and so bright. It feels like a soft, golden blanket.
 
 A small boy comes out to play. He sees the cat. He sits down next to her, very quiet. He does not want to wake her up. Together, they watch a cloud move across the blue sky.
 
-"Meow," says the cat. She rolls over and shows her soft white belly. The boy laughs. The cat purrs and purrs. What a good day. What a good nap. What a good friend.`
+"Meow," says the cat. She rolls over and shows her soft white belly. The boy laughs. The cat purrs and purrs. What a good day. What a good nap. What a good friend.`,
+    textRo:`Soarele e sus pe cer. O pisicuță stă la ușă. E cald. E somnoroasă. „Miau," zice. „Voi dormi aici, la soare."
+
+O pasăre cântă pe gard. O albină zumzăie lângă flori. Pisica deschide un ochi. Apoi îl închide la loc. Soarele e atât de cald și de strălucitor. Se simte ca o păturică moale, aurie.
+
+Un băiețel iese afară să se joace. O vede pe pisică. Se așază lângă ea, foarte linistit. Nu vrea s-o trezească. Împreună privesc un nor cum se mișcă pe cerul albastru.
+
+„Miau," zice pisica. Se întoarce pe spate și-și arată burtica albă și moale. Băiețelul râde. Pisica toarce și toarce. Ce zi bună. Ce somn bun. Ce prieten bun.`
   },
   {
     id:'fox',
     level:1, title:'The Brave Little Fox',
+    titleRo:'Vulpea cea mică și curajoasă',
     cover:'linear-gradient(135deg,#ff8a3d,#ff6b8a)',
     desc:'A small fox, a big adventure. The story that started it all.',
+    descRo:'O vulpe mică, o aventură mare. Povestea care a început totul.',
     narrator:'ben',
-    words:142, wpmTarget:70,
+    words:147, wpmTarget:70,
+    lang:'en',
     text:`A little fox lives in the woods. He is small, but he is brave. Today he will go far.
 
 He walks by the brook. The water is cold and quick. He jumps over rocks, one, two, three. He does not fall in. He is brave.
@@ -961,15 +1473,27 @@ He sees a deer at the edge of the trees. "Hello, friend!" he says. The deer lift
 
 The sun goes down. The sky turns orange, then pink. The fox turns back toward home. He runs through the soft leaves. He is tired, but he is happy. He went farther today than ever before.
 
-His mother meets him at the door. "You were so brave," she says. The little fox smiles. Tomorrow, he will go even farther.`
+His mother meets him at the door. "You were so brave," she says. The little fox smiles. Tomorrow, he will go even farther.`,
+    textRo:`O vulpe mică locuiește în pădure. E mică, dar e curajoasă. Azi va merge departe.
+
+Merge pe lângă pârâu. Apa e rece și iute. Sare peste pietre, una, două, trei. Nu cade. E curajoasă.
+
+Vede o căprioară la marginea copacilor. „Bună, prietenă!" zice. Căprioara ridică capul și dă din cap. E înaltă și liniștită. Vulpea cea mică se simte foarte mică. Dar nu fuge. Mai zice o dată bună.
+
+Soarele apune. Cerul devine portocaliu, apoi roz. Vulpea se întoarce spre casă. Aleargă prin frunzele moi. E obosită, dar e fericită. Azi a mers mai departe ca niciodată.
+
+Mama o așteaptă la ușă. „Ai fost atât de curajoasă," zice. Vulpea cea mică zâmbește. Mâine, va merge și mai departe.`
   },
   {
     id:'seed',
     level:2, title:'A Tiny Seed',
+    titleRo:'O sămânță mică',
     cover:'linear-gradient(135deg,#5cd6a4,#39d3b6)',
     desc:'From a seed to a sunflower — patience and wonder.',
+    descRo:'De la o sămânță la o floarea-soarelui — răbdare și mirare.',
     narrator:'mira',
     words:206, wpmTarget:90,
+    lang:'en',
     text:`Mara found a tiny seed in the garden. It was no bigger than her smallest fingernail. She cupped it in her hand and ran inside to show her grandmother.
 
 "What is this?" Mara asked. "A sunflower seed," said Grandmother. "Plant it in soft, dark soil. Give it water every day. And then you wait."
@@ -980,15 +1504,29 @@ Nothing happened for two whole days. Mara checked the pot every morning. Still n
 
 The sprout grew taller every week. Soon it had strong green leaves. Mara tied it to a stick so it would stand up straight. By summer, the little plant was taller than Mara herself. At the very top, a bright yellow flower opened to the sky.
 
-Inside the flower, hundreds of new seeds were waiting. Mara smiled. She picked the biggest one and put it in her pocket. "Next year," she said, "I will plant two."`
+Inside the flower, hundreds of new seeds were waiting. Mara smiled. She picked the biggest one and put it in her pocket. "Next year," she said, "I will plant two."`,
+    textRo:`Mara a găsit o sămânță mică în grădină. Nu era mai mare decât cea mai mică unghie de la mână. A pus-o în palmă și a fugit în casă s-o arate bunicii.
+
+„Ce e asta?" a întrebat Mara. „O sămânță de floarea-soarelui," a zis bunica. „Planteaz-o în pământ moale și închis. Ud-o în fiecare zi. Și apoi aștepți."
+
+Mara a plantat sămânța într-un ghiveci de hârtie maro. A udat-o cu o stropitoare mică și albastră. A pus-o pe pervaz, unde pătrundea soarele de dimineață. Și apoi a așteptat.
+
+Timp de două zile nu s-a întâmplat nimic. Mara verifica ghiveciul în fiecare dimineață. Tot nimic. În a treia zi, un muguraș verde mic a împins prin pământ. Mara a bătut din palme. A fugit să-i spună bunicii.
+
+Mugurașul creștea tot mai înalt în fiecare săptămână. Curând a avut frunze verzi și puternice. Mara l-a legat de un băț, ca să stea drept. Până la vară, planta mică era mai înaltă decât Mara. În vârf, o floare galbenă și strălucitoare s-a deschis spre cer.
+
+În floare, sute de semințe noi așteptau. Mara a zâmbit. A luat-o pe cea mai mare și a pus-o în buzunar. „La anul," a zis, „voi planta două."`
   },
   {
     id:'robot',
     level:3, title:'The Robot Who Wanted Tea',
+    titleRo:'Robotul care voia ceai',
     cover:'linear-gradient(135deg,#39d3b6,#5b8cff)',
     desc:'A friendly robot learns the joy of small daily rituals.',
+    descRo:'Un robot prietenos învață bucuria micilor ritualuri zilnice.',
     narrator:'felix',
     words:312, wpmTarget:110,
+    lang:'en',
     text:`Pip was a curious little robot who lived in a small blue house at the edge of town. Every afternoon at four o'clock, Pip watched the neighbors gather on their porches. They sat together in the warm light. They held small cups in their hands. They laughed, and talked, and watched the sun go down.
 
 Pip did not understand. The cups held only brown water with a strange smell. The neighbors did not seem to drink it very fast. They held it close, like a small warm friend.
@@ -1001,15 +1539,31 @@ Pip poured the water into two small cups. Pip carried them carefully to the porc
 
 They did not talk about important things. They talked about the dog that barked too much, and the cat that slept in the garden, and the boy who was learning to ride a bike. The sun went down. The streetlights came on. The cups grew cold.
 
-But Pip did not mind. Pip had discovered something the neighbors already knew. The cup was never really the point. The point was sitting together, on a porch, while the day grew soft.`
+But Pip did not mind. Pip had discovered something the neighbors already knew. The cup was never really the point. The point was sitting together, on a porch, while the day grew soft.`,
+    textRo:`Pip era un mic robot curios, care locuia într-o căsuță albastră la marginea orașului. În fiecare după-amiază la ora patru, Pip îi privea pe vecini cum se adună pe verande. Stăteau împreună în lumina caldă. Țineau în mână cești mici. Râdeau, povesteau, și priveau soarele cum apune.
+
+Pip nu înțelegea. Ceștile conțineau doar apă maronie cu un miros ciudat. Vecinii nu păreau s-o bea prea repede. O țineau aproape, ca pe un prieten mic și cald.
+
+Într-o zi, Pip s-a hotărât să încerce. Pip a mers până la magazinul mic de la colț. Vânzătoarea a zâmbit. „Prima dată?" a întrebat. „Da," a zis Pip. „Atunci ai nevoie de două lucruri," a zis. „Un ibric și timp."
+
+Pip a cumpărat un ibric mic și albastru. Acasă, Pip l-a umplut cu apă. Pip l-a pus pe foc și a așteptat. Pip privea apa. Apa nu făcea nimic mult timp. Apoi, foarte încet, bule mici au început să se ridice. Curând apa dansa, iar ibricul scoase un sunet grav, ca un cântec.
+
+Pip a turnat apa în două cești mici. Pip le-a dus cu grijă pe verandă. O vecină a făcut cu mâna de peste stradă. „Vino să stai," a strigat. Pip s-a așezat. Ceașca era caldă în mânile de metal ale lui Pip. Aburul s-a ridicat și i-a gâdilat antena.
+
+Nu au vorbit despre lucruri importante. Au vorbit despre câinele care lătra prea mult, și pisica ce dormea în grădină, și băiatul care învăța să meargă cu bicicleta. Soarele a apus. Felinarele s-au aprins. Ceștile s-au răcit.
+
+Dar Pip nu i-a păsat. Pip descoperise ceva ce vecinii știau deja. Ceașca nu era niciodată cu adevărat punctul. Punctul era să stai împreună, pe o verandă, în timp ce ziua devenea moale.`
   },
   {
     id:'stars',
     level:4, title:'Letters to the Stars',
+    titleRo:'Scrisori către stele',
     cover:'linear-gradient(135deg,#7d6bff,#ff6b8a)',
     desc:'A girl writes to the night sky — and the sky writes back.',
+    descRo:'O fetiță scrie către cerul nopții — și cerul răspunde.',
     narrator:'iris',
     words:575, wpmTarget:130,
+    lang:'en',
     text:`Every night before bed, Iris climbs onto the roof of her grandparents' house and writes a letter to the stars. She brings a flashlight, a small notebook, and a thermos of warm milk. She sits near the chimney where the roof is flat, and she watches the sky until her eyes learn to see the smaller ones. Only then does she begin to write.
 
 She tells them about her day. She tells them about the dog she saw in the park, the one with one brown ear and one white ear, who looked at her as if he had been waiting. She tells them about the strange taste of rain, which she finally decided was the taste of something far away. She tells them about the boy at school who shares her lunch with her, even though he has not much lunch of his own.
@@ -1032,7 +1586,30 @@ The paper cranes begin to multiply. Soon there are too many to count. They line 
 
 And every so often, when the night is very clear and very quiet, a new paper airplane appears on the glass. The handwriting is always the same. The paper is always the same pale sky-blue. And the message is always short, and always kind.
 
-She keeps them all in a wooden box under her bed. She does not show them to anyone. Some conversations are not meant to be shared. They are only meant to be had, night after night, between a girl on a roof and someone, somewhere, in the dark.`
+She keeps them all in a wooden box under her bed. She does not show them to anyone. Some conversations are not meant to be shared. They are only meant to be had, night after night, between a girl on a roof and someone, somewhere, in the dark.`,
+    textRo:`În fiecare noapte, înainte de culcare, Iris se cațără pe acoperișul casei bunicilor și scrie o scrisoare către stele. Ia cu ea o lanternă, un caiet mic și un termos cu lapte cald. Se așază lângă coș, unde acoperișul este plat, și privește cerul până când ochii ei învață să vadă și pe cele mai mici. Abia apoi începe să scrie.
+
+Le spune despre ziua ei. Le spune despre câinele pe care l-a văzut în parc, cel cu o ureche maro și una albă, care s-a uitat la ea ca și cum ar fi așteptat-o. Le spune despre gustul ciudat al ploii, pe care până la urmă a decis că e gustul a ceva foarte departe. Le spune despre băiatul de la școală care împarte prânzul cu ea, chiar dacă nu are prea mult prânz al lui.
+
+Împăturește fiecare scrisoare foarte mic, o pune pe cea mai strălucitoare stea pe care o găsește și șoptește: „Vă rog, scrieți-mi curând." Apoi coboară pe scară, se bagă în pat și adoarme la jumătatea gândului.
+
+Nu se așteaptă la un răspuns.
+
+Dar într-o dimineață, la două luni după ce a început, se trezește și găsește un avion de hârtie pe pervaz. E împăturit dintr-o bucată de hârtie albastruie, atât de palidă încât e aproape albă. Miroase ușor a aer rece și a ceva dulce, fără nume. Înăuntru, într-un scris de mână pe care nu-l recunoaște, sunt trei cuvinte: „Noi ascultăm."
+
+Iris stă foarte nemișcată. Ține avionul de hârtie în ambele mâini, de parcă ar putea zbura. Citește cele trei cuvinte din nou și din nou. Inima îi bate tare în piept. Cineva, undeva, îi citea scrisorile. Cineva i-a răspuns.
+
+În noaptea aceea, se cațără pe acoperiș ca de obicei. Dar de data aceasta, înainte să scrie scrisoarea, privește sus la stele un timp îndelungat. Încearcă să vadă cine, acolo sus, ar putea asculta. Nu vede pe nimeni. Stelele doar clipesc înapoi, cum fac stelele, fără niciun chip.
+
+Scrie scrisoarea oricum. Le spune stelelor despre avionul de hârtie. Le spune că nu-i este frică, doar foarte, foarte trează. Le spune că ar vrea să știe cine ascultă, dar nu are nevoie să știe. Să asculți e de ajuns.
+
+Din seara aceea, scrie două scrisori în fiecare noapte. Una pentru stele, ca înainte. Și una, în caietul ei albastru secret, pentru cineva care ascultă înapoi. Nu trimite a doua scrisoare. Doar o scrie, o citește pentru sine și o împăturește într-un cocor de hârtie pe care îl ține pe pervaz.
+
+Cocorii de hârtie încep să se înmulțească. Curând sunt prea mulți ca să-i numeri. Se aliniază pe pervaz ca un public mic, moale, împăturit. Fiecare e adresat aceleiași persoane, chiar dacă nu a aflat niciodată un nume.
+
+Și din când în când, când noaptea e foarte senină și foarte liniștită, un nou avion de hârtie apare pe sticlă. Scrisul de mână e mereu același. Hârtia e mereu același albastru palid. Și mesajul e mereu scurt, și mereu blând.
+
+Le păstrează pe toate într-o cutie de lemn sub pat. Nu le arată nimănui. Unele conversații nu sunt menite să fie împărtășite. Sunt doar menite să fie avute, noapte după noapte, între o fetiță pe un acoperiș și cineva, undeva, în întuneric.`
   }
 ];
 
@@ -1043,6 +1620,8 @@ const defaultState = {
   wordProgress:{}, // {bookId:{lastIdx:0}}
   narratorPrefs:{}, // {bookId: narratorId} — user override per book
   globalNarrator:null, // if set, override per-book narrator for all books
+  // lang is null by default — forces splash on first visit
+  lang: null,
 };
 let state = loadState();
 
@@ -1106,22 +1685,61 @@ document.addEventListener('click',(e)=>{
 function renderLibrary(){
   const grid = document.getElementById('book-grid');
   if(!grid) return;
-  const books = STORIES.filter(s => currentLevelFilter==='all' || String(s.level)===currentLevelFilter);
+  const lang = state.lang || 'en';
+  // Filter books by language — only show books that have text in the current language
+  const langBooks = STORIES.filter(s => {
+    if(lang === 'ro') return !!s.textRo;
+    return !!s.text;
+  });
+  const books = langBooks.filter(s => currentLevelFilter==='all' || String(s.level)===currentLevelFilter);
+  // Update filter chips to reflect levelNames in current lang
+  const filterContainer = document.getElementById('lib-filters');
+  if(filterContainer){
+    const chips = filterContainer.querySelectorAll('.filter-chip[data-level]');
+      chips.forEach(c => {
+        const lvl = c.dataset.level;
+        if(lvl === 'all'){
+          c.textContent = t('filterAll');
+        } else {
+          const levelNames = STRINGS[lang].levelNames;
+          c.textContent = t('filterLevel', lvl, levelNames[parseInt(lvl)-1] || '');
+        }
+      });
+    }
+  // Update view-head if present
+  const eyebrow = document.querySelector('#view-library .view-head .eyebrow');
+  if(eyebrow) eyebrow.textContent = t('libraryEyebrow');
+  const headline = document.querySelector('#view-library .view-head h1');
+  if(headline) headline.textContent = t('libraryHeadline');
+  const lead = document.querySelector('#view-library .view-head .lead');
+  if(lead) lead.textContent = t('libraryLead');
+
+  if(books.length === 0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="ic">📭</div><p>${lang === 'ro' ? 'Nicio carte pentru pe acest nivel.' : 'No books at this level.'}</p></div>`;
+    return;
+  }
+
+  const wordUnit = lang === 'ro' ? 'cuvinte' : 'words';
+  const minUnit = lang === 'ro' ? 'min' : 'min'; // same
+  const newLabel = t('bookNew');
+
   grid.innerHTML = books.map(b => {
     const wp = state.wordProgress[b.id] || {lastIdx:0};
     const pct = Math.min(100, Math.round((wp.lastIdx / b.words) * 100));
+    const title = lang === 'ro' ? (b.titleRo || b.title) : b.title;
+    const desc = lang === 'ro' ? (b.descRo || b.desc) : b.desc;
     return `
-      <button class="book-card" data-book="${b.id}" role="listitem" aria-label="${b.title}, level ${b.level}">
+      <button class="book-card" data-book="${b.id}" role="listitem" aria-label="${title}, ${lang === 'ro' ? 'nivel' : 'level'} ${b.level}">
         <div class="book-cover" style="background:${b.cover}">
-          <span class="lvl-badge">Level ${b.level}</span>
-          <span class="title-on-cover">${b.title}</span>
+          <span class="lvl-badge">${lang === 'ro' ? 'Nivel' : 'Level'} ${b.level}</span>
+          <span class="title-on-cover">${title}</span>
         </div>
         <div class="book-info">
-          <h3>${b.title}</h3>
-          <p class="desc">${b.desc}</p>
+          <h3>${title}</h3>
+          <p class="desc">${desc}</p>
           <div class="book-meta-row">
-            <span>${b.words} words · ~${Math.max(1,Math.round(b.words/b.wpmTarget))} min</span>
-            <span class="pill-sm">${pct>0 ? pct+'%' : 'New'}</span>
+            <span>${b.words} ${wordUnit} · ~${Math.max(1,Math.round(b.words/b.wpmTarget))} ${minUnit}</span>
+            <span class="pill-sm">${pct>0 ? t('bookProgress', pct) : newLabel}</span>
           </div>
           ${pct>0 ? `<div class="progress-bar"><div style="width:${pct}%"></div></div>` : ''}
         </div>
@@ -1158,10 +1776,72 @@ function renderPractice(){
   const empty = document.getElementById('practice-empty');
   const content = document.getElementById('practice-content');
   const titleEl = document.getElementById('practice-title');
+  // Update view-head static text
+  const pe = document.querySelector('#view-practice .view-head .eyebrow');
+  if(pe) pe.textContent = t('practiceEyebrow');
+  const ph = document.getElementById('practice-title');
+  if(ph) ph.textContent = t('practiceDefaultHeadline');
+  const pl = document.querySelector('#view-practice .view-head .lead');
+  if(pl) pl.textContent = t('practiceDefaultLead');
+  // Update empty-state strings
+  const ehead = document.querySelector('#practice-empty h3');
+  if(ehead) ehead.textContent = t('practiceEmpty');
+  const edesc = document.querySelector('#practice-empty p');
+  if(edesc) edesc.textContent = t('practiceEmptyDesc');
+  const ebtn = document.querySelector('#practice-empty button.btn-primary');
+  if(ebtn) ebtn.textContent = t('practiceGoLibrary');
+  // Update header meta labels
+  const phL = document.querySelectorAll('#practice-header-labels span');
+  // (skipped — we update inline below)
+  // Practice header labels
+  const lbls = document.querySelectorAll('.practice-header .meta div span.muted');
+  if(lbls.length >= 3){
+    lbls[0].textContent = t('phLevel');
+    lbls[1].textContent = t('phWords');
+    lbls[2].textContent = t('phWpm');
+  }
+  document.getElementById('change-book').textContent = t('changeBook');
+  // Narrator picker label
+  const npLabel = document.querySelector('.np-eyebrow');
+  if(npLabel) npLabel.textContent = t('narratorLabel');
+  // Controls labels
+  document.getElementById('play-label').textContent = t('playRead');
+  document.getElementById('btn-restart').textContent = t('btnRestart');
+  document.getElementById('btn-finish').textContent = t('btnDone');
+  const speedLbl = document.querySelector('.speed-control label');
+  if(speedLbl) speedLbl.textContent = t('speedLabel');
+  const speedSel = document.getElementById('speed-sel');
+  if(speedSel){
+    const opts = speedSel.querySelectorAll('option');
+    if(opts.length >= 4){
+      opts[0].textContent = t('speedSlow');
+      opts[1].textContent = '0.85×';
+      opts[2].textContent = t('speedNormal');
+      opts[3].textContent = t('speedFast');
+    }
+  }
+  // Finish card
+  document.querySelector('#finish-card h3').textContent = t('finishTitle');
+  const xpEl = document.querySelector('.xp-earned');
+  const xpSpan = document.getElementById('xp-earned');
+  if(xpEl && xpSpan) xpEl.firstChild.nodeValue = t('finishXp', xpSpan.textContent);
+  const finishStats = document.querySelectorAll('#finish-card .stat .lbl');
+  if(finishStats.length >= 3){
+    finishStats[0].textContent = t('finishTime');
+    finishStats[1].textContent = t('finishWpm');
+    finishStats[2].textContent = t('finishCov');
+  }
+  const finishBtns = document.querySelectorAll('#finish-card .btn');
+  if(finishBtns.length >= 3){
+    finishBtns[0].textContent = t('playAgain');
+    finishBtns[1].textContent = t('finishPickAnother');
+    finishBtns[2].textContent = t('finishSeeProgress');
+  }
+
   if(!state.currentBookId){
     if(empty) empty.classList.remove('hidden');
     if(content) content.classList.add('hidden');
-    if(titleEl) titleEl.textContent = 'Pick a story from the Library';
+    if(titleEl) titleEl.textContent = t('practiceDefaultHeadline');
     return;
   }
   const book = STORIES.find(s=>s.id===state.currentBookId);
@@ -1174,13 +1854,21 @@ function renderPractice(){
   currentBook = book;
   if(empty) empty.classList.add('hidden');
   if(content) content.classList.remove('hidden');
-  if(titleEl) titleEl.textContent = book.title;
+  const lang = state.lang || 'en';
+  const title = lang === 'ro' ? (book.titleRo || book.title) : book.title;
+  if(titleEl) titleEl.textContent = title;
   document.getElementById('ph-level').textContent = book.level;
   document.getElementById('ph-words').textContent = book.words;
   document.getElementById('ph-wpm').textContent = book.wpmTarget;
-  document.getElementById('story-title').textContent = book.title;
-  document.getElementById('story-sub').textContent = `Level ${book.level} · ${book.words} words · ~${Math.max(1,Math.round(book.words/book.wpmTarget))} min`;
+  document.getElementById('story-title').textContent = title;
+  document.getElementById('story-sub').textContent = t('subMeta', book.level, book.words, Math.max(1,Math.round(book.words/book.wpmTarget)));
   document.getElementById('finish-card').classList.add('hidden');
+  // Status: tts-status-text
+  const ts = document.getElementById('tts-status-text');
+  if(ts) ts.textContent = t('statusReady');
+  // Status class
+  const statusEl = document.getElementById('tts-status');
+  if(statusEl) statusEl.classList.remove('speaking'); statusEl.classList.add('paused');
   buildStoryDOM(book);
   renderNarratorPicker(book);
   resetTTSState();
@@ -1190,21 +1878,30 @@ function renderNarratorPicker(book){
   const opts = document.getElementById('np-options');
   const cur = document.getElementById('np-current');
   if(!opts) return;
-  // Effective narrator: user override > book default
-  const selectedId = (state.narratorPrefs && state.narratorPrefs[book.id]) || book.narrator || NARRATORS[0].id;
-  opts.innerHTML = NARRATORS.map(n => {
+  // Only show narrators matching the current UI language (so children see only relevant voices)
+  const lang = state.lang || 'en';
+  const availableNarrators = NARRATORS.filter(n => n.lang === lang);
+  // Effective narrator: user override > book default; ensure it matches available
+  let selectedId = (state.narratorPrefs && state.narratorPrefs[book.id]) || book.narrator;
+  if(!availableNarrators.find(n => n.id === selectedId)) {
+    selectedId = availableNarrators[0]?.id || book.narrator;
+  }
+  opts.innerHTML = availableNarrators.map(n => {
     const isActive = n.id === selectedId;
+    const lang2 = state.lang || 'en';
+    const name = lang2 === 'ro' ? n.name : (n.nameEn || n.name);
+    const desc = lang2 === 'ro' ? n.desc : (n.descEn || n.desc);
     return `
       <button type="button" class="np-opt ${isActive ? 'active' : ''}"
               data-narrator="${n.id}"
               role="radio"
               aria-checked="${isActive}"
               style="--narr-color:${n.color}"
-              title="${n.name} — ${n.desc}">
+              title="${name} — ${desc}">
         <span class="emoji" aria-hidden="true">${n.emoji}</span>
         <span class="meta">
-          <span class="name">${n.name}</span>
-          <span class="desc">${n.desc}</span>
+          <span class="name">${name}</span>
+          <span class="desc">${desc}</span>
         </span>
       </button>
     `;
@@ -1223,33 +1920,38 @@ function renderNarratorPicker(book){
         b.setAttribute('aria-checked', active ? 'true' : 'false');
       });
       const narr = getNarrator(id);
-      if(cur) cur.innerHTML = `Now reading with <b style="color:${narr.color}">${narr.emoji} ${narr.name}</b>`;
+      const lang2 = state.lang || 'en';
+      const name = lang2 === 'ro' ? narr.name : (narr.nameEn || narr.name);
+      if(cur) cur.innerHTML = `${lang2 === 'ro' ? 'Acum cite' : 'Now reading with'} <b style="color:${narr.color}">${narr.emoji} ${name}</b>`;
       // If currently speaking, restart with new narrator
       if(isSpeaking){
         stopTTS();
-        // small delay to let cancel complete
         setTimeout(() => {
-          // Re-read currentBook (already in scope)
           resetTTSState();
           startTTS();
-          showToast(`Switched to ${narr.name}`);
+          showToast(t('toastSwitched', name));
         }, 100);
       } else {
-        showToast(`Narrator: ${narr.name}`);
+        showToast(t('toastNarrator', name));
       }
     });
   });
   // Show current narrator in label
   const narr = getNarrator(selectedId);
-  if(cur) cur.innerHTML = `Default: <b style="color:${narr.color}">${narr.emoji} ${narr.name}</b>`;
+  const lang2 = state.lang || 'en';
+  const name = lang2 === 'ro' ? narr.name : (narr.nameEn || narr.name);
+  if(cur) cur.innerHTML = `${lang2 === 'ro' ? 'Implicit' : 'Default'}: <b style="color:${narr.color}">${narr.emoji} ${name}</b>`;
 }
 
 function buildStoryDOM(book){
   const el = document.getElementById('story-text');
   el.innerHTML = '';
   storyWords = [];
+  // Pick the text in the right language
+  const lang = state.lang || 'en';
+  const text = lang === 'ro' ? (book.textRo || book.text) : book.text;
   // Split words while keeping punctuation as separate
-  const tokens = book.text.split(/(\s+|[.,!?;:"])/);
+  const tokens = text.split(/(\s+|[.,!?;:"])/);
   let wIdx = 0;
   tokens.forEach(tok=>{
     if(!tok) return;
@@ -1285,11 +1987,11 @@ function resetTTSState(){
     w.node.classList.remove('active','spoken');
   });
   spokenSoFarLength = 0;
-  setStatus('paused','Ready');
+  setStatus('paused', t('statusReady'));
   const playIcon = document.getElementById('play-icon');
   const playLabel = document.getElementById('play-label');
   if(playIcon) playIcon.textContent = '▶';
-  if(playLabel) playLabel.textContent = 'Read aloud';
+  if(playLabel) playLabel.textContent = t('playRead');
   clearInterval(sessionTimerInterval);
   sessionTimerStart = 0;
 }
@@ -1352,9 +2054,9 @@ async function startTTS(){
   const sentences = text.match(/[^.!?]+[.!?]+|\S+/g) || [text];
 
   isSpeaking = true;
-  setStatus('speaking', `Reading with ${narrator.name}`);
+  setStatus('speaking', t('statusSpeaking', currentNarrator?.name || 'AI'));
   document.getElementById('play-icon').textContent = '⏸';
-  document.getElementById('play-label').textContent = 'Pause';
+  document.getElementById('play-label').textContent = t('playPause');
   sessionTimerStart = Date.now();
   tickSessionTimer();
 
@@ -1431,9 +2133,9 @@ function pauseTTS(){
   if(!isSpeaking) return;
   window.speechSynthesis.pause();
   isPaused = true;
-  setStatus('paused','Paused');
+  setStatus('paused', t('statusPaused'));
   document.getElementById('play-icon').textContent = '▶';
-  document.getElementById('play-label').textContent = 'Resume';
+  document.getElementById('play-label').textContent = t('playResume');
   clearInterval(sessionTimerInterval);
 }
 
@@ -1446,7 +2148,7 @@ function stopTTS(){
   ttsUtterance = null;
   clearInterval(sessionTimerInterval);
   document.getElementById('play-icon').textContent = '▶';
-  document.getElementById('play-label').textContent = 'Read aloud';
+  document.getElementById('play-label').textContent = t('playRead');
 }
 
 function highlightWord(idx){
@@ -1475,9 +2177,9 @@ function speakSingle(word){
 
 function finishReading(){
   isSpeaking = false;
-  setStatus('paused','Done');
+  setStatus('paused', t('statusReady'));
   document.getElementById('play-icon').textContent = '▶';
-  document.getElementById('play-label').textContent = 'Read again';
+  document.getElementById('play-label').textContent = t('playAgain');
   clearInterval(sessionTimerInterval);
   // Mark all words as spoken
   storyWords.forEach(w=>{w.node.classList.add('spoken');w.node.classList.remove('active');});
@@ -1507,7 +2209,7 @@ function showFinishCard(book, wpm, coverage, xp, minutes){
   document.getElementById('xp-earned').textContent = xp;
   document.getElementById('finish-card').classList.remove('hidden');
   document.getElementById('finish-card').scrollIntoView({behavior:'smooth', block:'center'});
-  showToast(`🎉 +${xp} XP earned!`, 2500);
+  showToast(`🎉 ${t('finishXp', xp)}`, 2500);
 }
 
 function saveSession(book, wpm, coverage, xp, minutes){
@@ -1516,6 +2218,7 @@ function saveSession(book, wpm, coverage, xp, minutes){
   state.sessions.unshift({
     bookId: book.id,
     title: book.title,
+    titleRo: book.titleRo,
     level: book.level,
     wpm, coverage, xp,
     minutes: Math.round(minutes*10)/10,
@@ -1555,7 +2258,9 @@ function refreshStreakPill(){
   const num = document.getElementById('streak-num');
   if(state.streak && state.streak > 0){
     pill.classList.remove('hidden');
-    num.textContent = state.streak;
+    if(num) num.textContent = state.streak;
+    // Re-render full pill text with i18n
+    pill.innerHTML = `🔥 ${state.streak} <span class="streak-tail">${state.lang === 'ro' ? 'zile streak' : 'day streak'}</span>`;
   } else {
     pill.classList.add('hidden');
   }
@@ -1563,11 +2268,45 @@ function refreshStreakPill(){
 
 /* ---------- Progress view ---------- */
 function renderProgress(){
+  const lang = state.lang || 'en';
+  // Update view-head text
+  const pe = document.querySelector('#view-progress .view-head .eyebrow');
+  if(pe) pe.textContent = t('progressEyebrow');
+  const ph = document.querySelector('#view-progress .view-head h1');
+  if(ph) ph.textContent = t('progressHeadline');
+  const pl = document.querySelector('#view-progress .view-head .lead');
+  if(pl) pl.textContent = t('progressLead');
+  // Update section headers
+  const histTitle = Array.from(document.querySelectorAll('#view-progress h2')).find(h => h.dataset.key === 'historyTitle');
+  const achTitle = Array.from(document.querySelectorAll('#view-progress h2')).find(h => h.dataset.key === 'achTitle');
+  if(!histTitle){
+    const h2s = document.querySelectorAll('#view-progress h2');
+    if(h2s[0]) h2s[0].textContent = t('historyTitle');
+    if(h2s[1]) h2s[1].textContent = t('achTitle');
+  }
+  // Update stat cards
+  const statCards = document.querySelectorAll('#view-progress .stat-card');
+  if(statCards.length >= 4){
+    statCards[0].querySelector('.lbl').textContent = t('statStreak');
+    statCards[0].querySelector('.sub').textContent = t('statStreakSub');
+    statCards[1].querySelector('.lbl').textContent = t('statXp');
+    statCards[2].querySelector('.lbl').textContent = t('statSessions');
+    statCards[2].querySelector('.sub').textContent = t('statSessionsSub');
+    statCards[3].querySelector('.lbl').textContent = t('statMinutes');
+    statCards[3].querySelector('.sub').textContent = t('statMinutesSub');
+  }
+  // Update export/reset buttons
+  const btns = document.querySelectorAll('#view-progress button.btn');
+  if(btns.length >= 2){
+    btns[0].textContent = t('btnExport');
+    btns[1].textContent = t('btnReset');
+  }
+
   // Stats
   document.getElementById('s-streak').textContent = state.streak || 0;
   document.getElementById('s-xp').textContent = state.xp || 0;
   const lvl = xpToLevel(state.xp||0);
-  document.getElementById('s-xp-sub').textContent = `Level ${lvl.name}`;
+  document.getElementById('s-xp-sub').textContent = t('statXpSub', lvl.name);
   document.getElementById('s-sessions').textContent = (state.sessions||[]).length;
   const totalMin = (state.sessions||[]).reduce((a,s)=>a + (s.minutes||0), 0);
   document.getElementById('s-minutes').textContent = Math.round(totalMin);
@@ -1576,17 +2315,22 @@ function renderProgress(){
   const hist = document.getElementById('history-list');
   const sessions = state.sessions || [];
   if(sessions.length === 0){
-    hist.innerHTML = `<div class="empty-state"><div class="ic">📖</div><p>No sessions yet — your reading history will appear here.</p><button class="btn btn-primary" data-tab="library" style="margin-top:14px">Browse Library →</button></div>`;
+    hist.innerHTML = `<div class="empty-state"><div class="ic">📖</div><p>${t('historyEmpty')}</p><button class="btn btn-primary" data-tab="library" style="margin-top:14px">${t('historyEmptyCta')}</button></div>`;
   } else {
     hist.innerHTML = sessions.map(s=>{
       const date = new Date(s.at);
-      const when = isToday(date) ? 'Today · ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-                : isYesterday(date) ? 'Yesterday · ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+      const timeStr = date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      const when = isToday(date) ? t('todayTime', timeStr)
+                : isYesterday(date) ? t('yesterdayTime', timeStr)
                 : date.toLocaleDateString();
+      const lvlLabel = lang === 'ro' ? 'Nivel' : 'Level';
+      const wpmLabel = lang === 'ro' ? 'wpm' : 'wpm';
+      const covLabel = lang === 'ro' ? 'acoperire' : 'coverage';
+      const minLabel = lang === 'ro' ? 'min' : 'min';
       return `
         <div class="history-row">
           <div class="ico">L${s.level}</div>
-          <div class="info"><b>${escapeHtml(s.title)}</b><small>${when} · ${s.wpm} wpm · ${s.coverage}% coverage · ${s.minutes} min</small></div>
+          <div class="info"><b>${escapeHtml(lang === 'ro' ? (s.titleRo || s.title) : s.title)}</b><small>${when} · ${s.wpm} ${wpmLabel} · ${s.coverage}% ${covLabel} · ${s.minutes} ${minLabel}</small></div>
           <div class="right"><b>+${s.xp}</b>XP</div>
         </div>
       `;
@@ -1601,14 +2345,14 @@ function isToday(d){ const t=new Date(); t.setHours(0,0,0,0); return d>=t; }
 function isYesterday(d){ const t=new Date(); t.setHours(0,0,0,0); const y=new Date(t); y.setDate(y.getDate()-1); return d>=y && d<t; }
 
 const ACHIEVEMENTS = [
-  {id:'first', name:'First steps', desc:'Read your first story', icon:'🌱', check: s => (s.sessions||[]).length >= 1},
-  {id:'streak3', name:'3-day streak', desc:'Read 3 days in a row', icon:'🔥', check: s => (s.streak||0) >= 3},
-  {id:'streak7', name:'Week warrior', desc:'Read 7 days in a row', icon:'🏆', check: s => (s.streak||0) >= 7},
-  {id:'xp100', name:'XP Hunter', desc:'Earn 100 XP total', icon:'⭐', check: s => (s.xp||0) >= 100},
-  {id:'xp500', name:'XP Master', desc:'Earn 500 XP total', icon:'🌟', check: s => (s.xp||0) >= 500},
-  {id:'wpm100', name:'Fast reader', desc:'Hit 100+ wpm in a session', icon:'⚡', check: s => (s.sessions||[]).some(x => x.wpm >= 100)},
-  {id:'books3', name:'Bookworm', desc:'Finish 3 different books', icon:'📚', check: s => new Set((s.sessions||[]).map(x=>x.bookId)).size >= 3},
-  {id:'all', name:'Library explorer', desc:'Read at least one book from every level', icon:'🗺️', check: s => {
+  {id:'first', nameKey:'achFirst', descKey:'achFirstDesc', icon:'🌱', check: s => (s.sessions||[]).length >= 1},
+  {id:'streak3', nameKey:'achStreak3', descKey:'achStreak3Desc', icon:'🔥', check: s => (s.streak||0) >= 3},
+  {id:'streak7', nameKey:'achStreak7', descKey:'achStreak7Desc', icon:'🏆', check: s => (s.streak||0) >= 7},
+  {id:'xp100', nameKey:'achXp100', descKey:'achXp100Desc', icon:'⭐', check: s => (s.xp||0) >= 100},
+  {id:'xp500', nameKey:'achXp500', descKey:'achXp500Desc', icon:'🌟', check: s => (s.xp||0) >= 500},
+  {id:'wpm100', nameKey:'achWpm100', descKey:'achWpm100Desc', icon:'⚡', check: s => (s.sessions||[]).some(x => x.wpm >= 100)},
+  {id:'books3', nameKey:'achBooks3', descKey:'achBooks3Desc', icon:'📚', check: s => new Set((s.sessions||[]).map(x=>x.bookId)).size >= 3},
+  {id:'all', nameKey:'achAll', descKey:'achAllDesc', icon:'🗺️', check: s => {
     const levels = new Set((s.sessions||[]).map(x=>x.level));
     return levels.size >= 5;
   }},
@@ -1621,15 +2365,23 @@ function renderAchievements(){
     return `
       <div class="ach ${unlocked?'':'locked'}">
         <div class="ic">${a.icon}</div>
-        <div class="info"><b>${a.name}</b><small>${a.desc}</small></div>
+        <div class="info"><b>${t(a.nameKey)}</b><small>${t(a.descKey)}</small></div>
       </div>
     `;
   }).join('');
 }
 
 function xpToLevel(xp){
+  const lang = state.lang || 'en';
+  const levelNames = STRINGS[lang].xpLevelNames;
   const tiers = [
-    [0,'Reader 1'],[100,'Reader 2'],[300,'Reader 3'],[600,'Bookworm'],[1000,'Story Hunter'],[2000,'Word Wizard'],[5000,'Reading Master']
+    [0, levelNames[0]],
+    [100, levelNames[1]],
+    [300, levelNames[2]],
+    [600, levelNames[3]],
+    [1000, levelNames[4]],
+    [2000, levelNames[5]],
+    [5000, levelNames[6]],
   ];
   let name = tiers[0][1];
   for(const [min,n] of tiers){ if(xp >= min) name = n; }
@@ -1685,27 +2437,54 @@ document.getElementById('btn-export').addEventListener('click', ()=>{
   a.href = url; a.download = `readalong-kids-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  showToast('📥 Progress exported');
+  showToast('📥 ' + t('toastExported'));
 });
 document.getElementById('btn-reset').addEventListener('click', ()=>{
-  if(!confirm('Reset all progress? This cannot be undone.')) return;
+  if(!confirm(t('confirmReset'))) return;
   state = {...defaultState};
   saveState();
   renderProgress();
   refreshStreakPill();
-  showToast('🗑 Progress reset');
+  showToast('🗑 ' + t('toastReset'));
 });
 
 /* ---------- Init ---------- */
 function init(){
+  // Splash logic: hide if lang already chosen
+  if(!maybeShowSplash()){
+    // user already has a preference
+  } else {
+    // Show splash, wait for click
+    document.querySelectorAll('[data-pick-lang]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lang = btn.dataset.pickLang;
+        setLang(lang);
+        hideSplash();
+        // Apply after splash is hidden for smooth transition
+        showToast(lang === 'ro' ? '🇷🇴 Bun venit!' : '🇬🇧 Welcome!', 1800);
+      });
+    });
+  }
+
+  // Header language toggle (top right) — works after splash
+  const lt = document.getElementById('lang-toggle');
+  if(lt) lt.addEventListener('click', () => {
+    const newLang = state.lang === 'ro' ? 'en' : 'ro';
+    setLang(newLang);
+    showToast(newLang === 'ro' ? '🇷🇴 Română' : '🇬🇧 English', 1400);
+  });
+  const lm = document.getElementById('lang-mobile');
+  if(lm) lm.addEventListener('click', (e) => {
+    e.stopPropagation(); // don't trigger parent tab switch
+    const newLang = state.lang === 'ro' ? 'en' : 'ro';
+    setLang(newLang);
+    showToast(newLang === 'ro' ? '🇷🇴 Română' : '🇬🇧 English', 1400);
+  });
+
+  applyLang();
   refreshStreakPill();
   showView('home');
   renderLibrary();
-
-  // Greeting based on time
-  const h = new Date().getHours();
-  const greet = h<12 ? 'Good morning' : h<18 ? 'Good afternoon' : 'Good evening';
-  // No external message — keep it clean
 }
 init();
 </script>
